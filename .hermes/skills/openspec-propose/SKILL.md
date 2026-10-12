@@ -141,10 +141,12 @@ In both branches, never create the root as a side effect: do not run `openspec i
       - Ask the user to clarify
       - Then continue with creation
 
-7. **Show final status**
+7. **Validate, then show final status**
    ```bash
+   openspec validate "<name>" --strict
    openspec status --change "<name>"
    ```
+   `status` only reports file existence, so an artifact that exists can still be malformed (missing scenario, over-long requirement description, delta headers that do not parse). `validate` is the real completion check: run it with `--strict` and fix what it reports before presenting the change. Report the validate result in your summary, not just the artifact list.
 
 **Output**
 
@@ -172,3 +174,5 @@ After completing all artifacts, summarize:
 - Ask about ambiguities that would materially change scope, externally observable behavior, compatibility, or acceptance criteria; for minor details, make reasonable assumptions and record them
 - If a change with that name already exists, ask if user wants to continue it or create a new one
 - Verify each artifact file exists after writing before proceeding to next
+- Finish with `openspec validate "<name>" --strict` in green. Existence is not validity, and only validation gates the apply phase
+- A project set up by `openspec init` carries one copy of these skills per agent tool (`.claude/skills/`, `.opencode/skills/`, `.hermes/skills/` and the matching command dirs), differing only in the slash-command names they quote. They are generated copies, not duplication: never "clean up" the other tools' copies, and patch a rule into the copy for the tool in use
