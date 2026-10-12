@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 
 import { BotonDeMenu } from "@/components/estructura/barra-lateral";
 import { seccionDeLaRuta } from "@/components/estructura/secciones";
+import { SelectorDeModo } from "@/components/tema/selector-de-modo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * El encabezado de la pantalla: el título de la sección actual y, sólo cuando la pantalla
- * tiene una, su acción principal. El selector de modo se suma acá (tarea 4.3).
+ * El encabezado de la pantalla: el título de la sección actual, su acción principal cuando
+ * la pantalla tiene una y el selector de modo.
  */
 export function Encabezado() {
   const seccion = seccionDeLaRuta(usePathname());
@@ -21,12 +22,15 @@ export function Encabezado() {
         <BotonDeMenu />
         <h1 className="text-page-title">{seccion?.titulo ?? "Aggility"}</h1>
       </div>
-      {seccion?.accion ? (
-        // Un enlace con el aspecto de botón: navega, así que su rol es enlace, no botón.
-        <Link href={seccion.accion.href} className={cn(buttonVariants())}>
-          {seccion.accion.etiqueta}
-        </Link>
-      ) : null}
+      <div className="flex shrink-0 items-center gap-2">
+        {seccion?.accion ? (
+          // Un enlace con el aspecto de botón: navega, así que su rol es enlace, no botón.
+          <Link href={seccion.accion.href} className={cn(buttonVariants())}>
+            {seccion.accion.etiqueta}
+          </Link>
+        ) : null}
+        <SelectorDeModo />
+      </div>
     </header>
   );
 }

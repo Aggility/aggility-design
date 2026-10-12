@@ -6,14 +6,15 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 17 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
-  Vitest, Playwright y `.gitignore`), el **grupo 2 completo** (el tema generado desde los
-  tokens), la **3.1** (componentes base con la CLI oficial) y la **3.2** (la barra lateral:
-  logo, secciones agrupadas con el ítem activo, menú del usuario y el armazón en el layout).
+- 24 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
+  el **grupo 3 completo** (armazón: componentes base con la CLI, barra lateral, encabezado,
+  cajón a 390 px y teclado) y el **grupo 4 completo** (modo claro y oscuro: proveedor,
+  selector en el encabezado y primer pintado sin destello).
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
   `npx playwright test` (6 pasan, 4 saltados a propósito en el ancho angosto) y `npm run build`.
-- La próxima tarea es la **3.3** (el encabezado de sección: título y selector de modo, y la
-  acción principal cuando la hay). Se retoma con:
+- La próxima tarea es la **5.1** (generar con la CLI los componentes base que faltan: los
+  14 de la sección 5.4, de los que ya están botón, campo, separador, esqueleto, tooltip,
+  cajón, barra lateral, avatar y menú desplegable). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 
 ## Lo que ya está armado

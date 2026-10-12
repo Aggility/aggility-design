@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { BarraLateral } from "@/components/estructura/barra-lateral";
 import { Encabezado } from "@/components/estructura/encabezado";
+import { ProveedorDeModo } from "@/components/tema/proveedor-de-modo";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import "./globals.css";
@@ -24,16 +25,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es-AR" className={inter.variable}>
+    // `suppressHydrationWarning`: next-themes actualiza la clase de este elemento, como pide
+    // su documentación. Sólo aplica a este nivel, no tapa diferencias de los hijos.
+    <html lang="es-AR" className={inter.variable} suppressHydrationWarning>
       <body>
-        <SidebarProvider>
-          <BarraLateral />
-          {/* `SidebarInset` es el `main` de la pantalla: las páginas no llevan otro. */}
-          <SidebarInset>
-            <Encabezado />
-            {children}
-          </SidebarInset>
-        </SidebarProvider>
+        <ProveedorDeModo>
+          <SidebarProvider>
+            <BarraLateral />
+            {/* `SidebarInset` es el `main` de la pantalla: las páginas no llevan otro. */}
+            <SidebarInset>
+              <Encabezado />
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+        </ProveedorDeModo>
       </body>
     </html>
   );
