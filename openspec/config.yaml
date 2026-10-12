@@ -1,0 +1,63 @@
+schema: spec-driven
+
+context: |
+  Language: es
+  All artifacts must be written in es.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  Proyecto: sistema de diseño de Aggility. Una app Next.js con el tema, los
+  componentes y pantallas de muestra con datos de ejemplo, que se copia al
+  construir cualquier herramienta de Aggility. La revisa Germán.
+
+  Documento de producto: docs/referencia/spec-producto.md. Es la fuente de las
+  reglas (sección 7) y de los criterios de aceptación (sección 8), que acá se
+  citan como CA-1 a CA-10. Todo requisito cita el CA o la regla de la que sale.
+  Si algo de un cambio contradice ese documento, manda el documento: frená y avisá.
+  Reglas visuales: sistema/guia.md. Valores: sistema/tokens.json, única fuente.
+  Hoja de ruta (un cambio de OpenSpec por fila): docs/roadmap.md.
+
+  Stack decidido: Next.js (App Router) + TypeScript estricto, Tailwind v4,
+  shadcn/ui con estilo base-nova (Base UI, íconos lucide-react), Recharts para
+  gráficos, fuente Inter con next/font/google. Tests: Vitest y Playwright.
+  Sin base de datos ni autenticación: los datos son de ejemplo, en archivos.
+
+  Forma de trabajo: se construye con Hermes y modelos económicos; se puede
+  alternar con opencode o Claude Code, así que nada del proceso depende de una
+  herramienta. Germán aprueba la propuesta de cada cambio y revisa las capturas
+  y el diff antes de archivar. Al cerrar cada cambio, un modelo más fuerte, en
+  otra sesión, revisa verificacion.md y las capturas contra la spec.
+
+rules:
+  proposal:
+    - Listar los CA y las reglas de docs/referencia/spec-producto.md que cubre el cambio.
+    - Decir explícitamente qué queda fuera y en qué cambio de docs/roadmap.md se hace.
+  specs:
+    - Cada requisito cita entre paréntesis el CA o la regla de origen, por ejemplo (CA-4, regla 2).
+    - Cada requisito tiene al menos un escenario de error o de borde además del caso feliz, cuando exista uno.
+    - Ningún requisito nombra librerías, archivos ni funciones.
+  design:
+    - Cada decisión dice la alternativa descartada y qué requisito o CA la exige.
+    - "No supongas versiones: verificalas con npm view antes de escribirlas, incluidas sus peerDependencies. Escribí la versión exacta."
+    - Toda dependencia de runtime nueva se lista aparte, para que Germán la apruebe.
+    - Los componentes base se generan con la CLI oficial de shadcn, nunca a mano ni copiados de otro proyecto.
+  tasks:
+    - "Tareas chicas: cada una toca pocos archivos y se hace en 15 a 20 minutos. Si una tarea necesita más de 5 archivos, partila."
+    - "Cada tarea dice qué archivos crea o cambia, qué test escribe primero y el comando que la verifica."
+    - Tests primero en cada tarea, y se ven fallar antes de escribir el código.
+    - Cada tarea termina con un comando de verificación que devuelve verde o rojo, nunca una apreciación.
+    - Toda tarea que cambia algo visible regenera las capturas (npm run capturas) desde que ese comando existe.
+    - La última tarea escribe verificacion.md (requisito, test, resultado) y lista las capturas a revisar.
+    - Al final, una tabla de trazabilidad requisito → tareas. Si una fila queda vacía, falta una tarea.
+
+operations:
+  apply:
+    guidance:
+      - Una tarea por vez, en orden. No toques nada fuera de esa tarea.
+      - Antes de cada tarea, releé la tarea, los requisitos que cita y sistema/guia.md si la tarea es visual.
+      - Una tarea está terminada cuando su verificación da verde y la suite completa sigue en verde (npm test y npx playwright test).
+      - "Nunca uses un color, tamaño de letra o radio literal en src/: usá las clases que salen de los tokens. Si falta un token, frená y anotalo como bloqueo; no lo inventes."
+      - "No sumes paquetes ni cambies versiones que design.md no nombra. Si hace falta, frená y anotalo como bloqueo debajo de la tarea."
+      - Si una tarea falla tres veces, anotá el problema debajo de la tarea en tasks.md y frená.
+      - "Si en tasks.md aparece una línea que empieza con **Puerta de Germán**, frená al llegar a ella y esperá su OK."
+      - Commit por tarea, con el número de la tarea en el mensaje. Nunca push ni deploy sin que Germán lo pida.
+      - Si el código tiene razón y un documento quedó viejo, corregí el documento en el mismo commit y avisá.
