@@ -6,16 +6,28 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 16 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
-  Vitest, Playwright y `.gitignore`), el **grupo 2 completo** (el tema generado desde
-  los tokens) y la **3.1** (el bloque de barra lateral y los componentes base con la CLI
-  oficial de shadcn, con las decisiones de Germán del 12/10/2026 ya aplicadas).
+- 17 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
+  Vitest, Playwright y `.gitignore`), el **grupo 2 completo** (el tema generado desde los
+  tokens), la **3.1** (componentes base con la CLI oficial) y la **3.2** (la barra lateral:
+  logo, secciones agrupadas con el ítem activo, menú del usuario y el armazón en el layout).
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
-  `npx playwright test` (2/2) y `npm run build`.
-- La próxima tarea es la **3.2** (la barra lateral propia, con su test e2e primero). Se
-  retoma con: `openspec instructions apply --change "base-visual" --json`
-- El tema ya está cableado: `src/app/globals.css` importa la copia del tema y la app
-  carga Inter con `next/font` (pesos 400, 500 y 600).
+  `npx playwright test` (6 pasan, 4 saltados a propósito en el ancho angosto) y `npm run build`.
+- La próxima tarea es la **3.3** (el encabezado de sección: título y selector de modo, y la
+  acción principal cuando la hay). Se retoma con:
+  `openspec instructions apply --change "base-visual" --json`
+
+## Lo que ya está armado
+
+- **El tema**: `npm run tema` escribe `sistema/aggility-theme.css` y la copia de la app;
+  `src/app/globals.css` la importa y la app carga Inter con `next/font`.
+- **Los componentes base**: los 9 que generó la CLI (botón, campo, separador, esqueleto,
+  tooltip, cajón, barra lateral, avatar, menú desplegable) en `src/components/ui/`.
+- **El armazón**: `src/components/estructura/secciones.ts` (grupos, secciones y el usuario de
+  ejemplo) y `barra-lateral.tsx`. El layout arma `SidebarProvider` + la barra + `SidebarInset`
+  (que es el `main`: las páginas no llevan otro).
+- **Las rutas**: `/` (Inicio), `/fundamentos`, `/clientes`, `/clientes/nuevo`, `/ingreso` y
+  `/estados`. Las cinco últimas son pantallas con un párrafo: cada una llega en su cambio
+  (Fundamentos en el grupo 7, las de muestra en `pantallas-muestra`).
 
 ## El generador del tema (grupo 2, ya hecho)
 

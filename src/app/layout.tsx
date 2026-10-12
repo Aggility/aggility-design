@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { BarraLateral } from "@/components/estructura/barra-lateral";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
 import "./globals.css";
 
 /** La única tipografía del sistema, servida desde la app (`--font-sans` la usa). */
@@ -21,7 +24,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es-AR" className={inter.variable}>
-      <body>{children}</body>
+      <body>
+        <SidebarProvider>
+          <BarraLateral />
+          {/* `SidebarInset` es el `main` de la pantalla: las páginas no llevan otro. */}
+          <SidebarInset>{children}</SidebarInset>
+        </SidebarProvider>
+      </body>
     </html>
   );
 }
