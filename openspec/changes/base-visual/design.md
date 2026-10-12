@@ -164,7 +164,7 @@ El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.
 
 No hay ninguna dependencia de datos ni de autenticación: los datos son de ejemplo y las pantallas de este cambio no usan datos.
 
-Dependencias de desarrollo (no van a producción): `typescript`, `tailwindcss`, `@tailwindcss/postcss`, `shadcn` (la CLI), `eslint`, `eslint-config-next`, `prettier`, `vitest`, `vite`, `@vitejs/plugin-react`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `@testing-library/dom`, `@playwright/test` y los `@types/*`.
+Dependencias de desarrollo (no van a producción): `typescript`, `tailwindcss`, `@tailwindcss/postcss`, `shadcn` (la CLI), `tw-animate-css` (de dónde salen las clases de animación que usan los componentes generados: la pide el preset `base-nova` al inicializar el proyecto, aprobada por Germán el 12/10/2026), `eslint`, `eslint-config-next`, `prettier`, `vitest`, `vite`, `@vitejs/plugin-react`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `@testing-library/dom`, `@playwright/test` y los `@types/*`.
 
 ## Versiones verificadas (12/10/2026)
 
@@ -183,6 +183,7 @@ Dependencias de desarrollo (no van a producción): `typescript`, `tailwindcss`, 
 | `tailwindcss` | 4.3.3 | — |
 | `@tailwindcss/postcss` | 4.3.3 | — |
 | `shadcn` (CLI, desarrollo) | 4.21.4 | Preset `base-nova` disponible; registra los 14 componentes y `sidebar` |
+| `tw-animate-css` (desarrollo) | 1.4.0 | Sin dependencias, sin dependencias entre pares ni `engines`. Lo pide el preset `base-nova` del CLI al inicializar (verificado el 12/10/2026 contra el registro: `https://ui.shadcn.com/r/styles/base-nova/index.json`) |
 | `eslint` | 10.12.0 | — |
 | `eslint-config-next` | 16.4.0 | `eslint` >= 9.0.0 (10.12.0 cumple), `typescript` >= 3.3.1 |
 | `prettier` | 3.9.10 | — |

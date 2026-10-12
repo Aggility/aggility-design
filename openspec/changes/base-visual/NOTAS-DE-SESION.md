@@ -11,9 +11,12 @@
   los tokens), en 12 commits.
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
   `npx playwright test` y `npm run build`.
-- **La próxima tarea es la 3.1 y está FRENADA**: el `init` de la CLI de shadcn trae
-  `tw-animate-css`, que `design.md` no nombra. Está todo anotado debajo de la tarea en
-  `tasks.md`; falta el OK de Germán. Se retoma con:
+- **La próxima tarea es la 3.1 y está FRENADA a mitad de camino**: la CLI de shadcn ya
+  corrió (`init -d` + `add sidebar -y`) y su salida **está en el árbol de trabajo sin
+  commitear**. Quedan cuatro puntos para decidir con Germán (el paquete `cn`, el test de
+  CA-1 contra el código generado, un error de lint en `use-mobile.ts` y el anillo de foco
+  + la escala de texto contra la guía). Está todo con evidencia debajo de la tarea en
+  `tasks.md`. Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 - El tema ya está cableado: `src/app/globals.css` importa la copia del tema y la app
   carga Inter con `next/font` (pesos 400, 500 y 600).
@@ -72,10 +75,20 @@ tests corrieron contra la pantalla `/ingreso` de `aggility-gestion`.
   (texto o `<title>`), para que un puerto ajeno lo haga fallar en lugar de dar verde.
 - Vale para las tareas 3.4 (390 px), 3.5, el grupo 4 y la 6.1 (capturas).
 
-## Lo que le falta al grupo 3
+## Lo que hace la CLI del grupo 3 (verificado el 12/10/2026, corriéndola)
 
-- La CLI de shadcn (`shadcn@4.21.4`, preset `base-nova`) puede escribir variables de estilo en
-  `globals.css` y en otros archivos: hay que borrarlas y dejar el tema generado, y que
-  `npm test` (el test de coincidencia y el de CA-1) siga en verde.
-- `globals.css` tiene hoy el `@custom-variant dark (&:is(.dark *))` que el encabezado del tema
-  documenta; si la CLI lo agrega de nuevo, hay que dejar una sola declaración.
+- **Necesita `next.config.*`**: si no está, corta con "We could not detect a supported
+  framework". Se creó `next.config.ts` vacío.
+- `init -d --no-monorepo` **pisa `globals.css`** (agrega su paleta neutra en `@theme inline`,
+  `:root` y `.dark`, más un `@layer base` y `html { @apply font-sans }`) y **cambia la
+  tipografía de `layout.tsx` por Geist**. Hay que restaurar los dos y dejar sólo sus dos
+  `@import` (`tw-animate-css` y `shadcn/tailwind.css`, del paquete ya aprobado) y el
+  `@layer base`.
+- Pone `tw-animate-css` como dependencia de **runtime y con rango `^`**: va a
+  `devDependencies` fijo en `1.4.0`. También convierte `shadcn` de `4.21.4` a `^4.21.4`.
+- Instala el paquete npm **`cn`** (no es clsx+tailwind-merge, es un paquete aparte de los
+  mismos autores) y el código generado importa de ahí.
+- Los componentes generados **no tienen ningún color literal** y sus radios salen del tema,
+  pero sí traen valores propios de tamaño de letra y radio (el test de CA-1 los marca) y la
+  escala de texto por defecto de la herramienta (`text-sm`, `text-xs`). `use-mobile.ts` trae
+  un error de lint. Todo eso está con evidencia en `tasks.md`, bajo la 3.1.
