@@ -43,3 +43,15 @@ generador tiene que reproducir el archivo actual **byte a byte**. Su estructura,
   carga como CommonJS.
 - `npm audit` reporta 9 vulnerabilidades altas, todas en el árbol de **desarrollo** del
   CLI de `shadcn` (`fast-glob`/`ts-morph` vía `@shadcn/registry`). Nada de runtime.
+
+## Trampa ya pagada: puertos ocupados por otras apps de Aggility
+
+En 3000 y 3100 puede haber otras apps de Aggility corriendo: hoy `aggility-gestion` tenía
+dos servidores levantados. Con `reuseExistingServer: true`, Playwright **reutiliza** ese
+servidor y los tests dan verde contra la app equivocada. Ya pasó en la tarea 1.6: los
+tests corrieron contra la pantalla `/ingreso` de `aggility-gestion`.
+
+- `playwright.config.ts` usa el puerto **3202** y `reuseExistingServer: false`.
+- Todo test que corra contra el servidor tiene que afirmar algo **propio** de esta app
+  (texto o `<title>`), para que un puerto ajeno lo haga fallar en lugar de dar verde.
+- Vale para las tareas 3.4 (390 px), 3.5, el grupo 4 y la 6.1 (capturas).

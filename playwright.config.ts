@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const URL_BASE = "http://localhost:3100";
+// Puerto propio y poco común: en 3000 y 3100 puede haber otras apps de Aggility corriendo.
+const PUERTO = 3202;
+const URL_BASE = `http://localhost:${PUERTO}`;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -17,9 +19,11 @@ export default defineConfig({
     { name: "angosto", use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 } } },
   ],
   webServer: {
-    command: "npm run dev -- --port 3100",
+    command: `npm run dev -- --port ${PUERTO}`,
     url: URL_BASE,
-    reuseExistingServer: !process.env.CI,
+    // NUNCA reutilizar un servidor ajeno. Con `true`, los tests dieron verde contra
+    // aggility-gestion, que ya estaba escuchando en el puerto elegido.
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });
