@@ -17,8 +17,14 @@ const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 /** La fuente de valores: única y compartida por todo el sistema de diseño. */
 export const FUENTE = path.join(RAIZ, "sistema", "tokens.json");
 
-/** Los archivos que el generador escribe. */
-export const DESTINOS = [path.join(RAIZ, "sistema", "aggility-theme.css")];
+/**
+ * Los archivos que el generador escribe: el canónico del sistema (el que copia
+ * otra app) y la copia que consume esta app, que así se puede copiar entera.
+ */
+export const DESTINOS = [
+  path.join(RAIZ, "sistema", "aggility-theme.css"),
+  path.join(RAIZ, "src", "app", "aggility-theme.css"),
+];
 
 /** Proporción de cada radio respecto del radio base (`radius-lg` de la fuente). */
 const RADIOS = [
