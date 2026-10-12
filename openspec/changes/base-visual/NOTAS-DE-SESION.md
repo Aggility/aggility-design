@@ -11,7 +11,9 @@
   los tokens), en 12 commits.
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
   `npx playwright test` y `npm run build`.
-- La próxima tarea es la **3.1** (barra lateral con la CLI de shadcn). Se retoma con:
+- **La próxima tarea es la 3.1 y está FRENADA**: el `init` de la CLI de shadcn trae
+  `tw-animate-css`, que `design.md` no nombra. Está todo anotado debajo de la tarea en
+  `tasks.md`; falta el OK de Germán. Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 - El tema ya está cableado: `src/app/globals.css` importa la copia del tema y la app
   carga Inter con `next/font` (pesos 400, 500 y 600).

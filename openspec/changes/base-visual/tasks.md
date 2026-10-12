@@ -50,6 +50,23 @@ Cubre la capacidad `tema` (CA-1, CA-2, reglas 2 y 3).
 Cubre la capacidad `estructura-app` (CA-4, CA-8, sección 5.3).
 
 - [ ] 3.1 Generar el bloque de barra lateral con la CLI oficial (`shadcn@4.21.4`, preset `base-nova`), junto con `components.json` y la utilidad de composición de clases. Archivos: `components.json`, `src/components/ui/*`, `src/lib/utils.ts`. Verificación: `npx tsc --noEmit`, `npm run lint` y `npm test` (incluye el test de CA-1) en verde; si la CLI escribe variables de estilo, se borran y vuelve a quedar el tema generado (test de 2.5 en verde).
+  - **BLOQUEO (12/10/2026): el `init` de la CLI trae un paquete que `design.md` no nombra.** Verificado contra el registro (`https://ui.shadcn.com/r/styles/base-nova/index.json`, no se tocó el repo):
+    - El estilo `base-nova` pide `dependencies`: `class-variance-authority`, `cn`, `lucide-react`, `@base-ui/react` → **todas ya aprobadas** en `design.md` (y `cn` es el alias del registro para `clsx` + `tailwind-merge`, que también están aprobados).
+    - Pero pide `devDependencies`: **`tw-animate-css`** (última: 1.4.0, hoy no instalado) y `shadcn` (ya está, 4.21.4). `tw-animate-css` **no figura** en la tabla de dependencias de `design.md`, ni en las de desarrollo.
+    - Y agrega a `globals.css` dos `@import` y un bloque base:
+      ```css
+      @import "tw-animate-css";
+      @import "shadcn/tailwind.css";
+
+      @layer base {
+        * { @apply border-border outline-ring/50 }
+        body { @apply bg-background text-foreground }
+      }
+      ```
+      El segundo sale del paquete `shadcn` (ya aprobado): revisado `node_modules/shadcn/dist/tailwind.css`, no declara ningún color ni variable del tema (son variantes propias como `data-open` y keyframes). El bloque `@layer base` no son variables de estilo: usa clases del tema (`border-border`, `bg-background`, `text-foreground`), así que no es lo que la tarea manda borrar.
+    - Lo que falta es **`tw-animate-css`**, de donde salen las clases de animación (`animate-in`, `fade-in-0`, `slide-in-from-*`…) que usan los componentes generados (el cajón, el diálogo, el menú).
+  - La regla del apply dice: "No sumes paquetes ni cambies versiones que `design.md` no nombra. Si hace falta, frená y anotalo como bloqueo debajo de la tarea." Queda frenada acá, sin tocar el repo: falta que Germán apruebe `tw-animate-css` (y la línea nueva en `design.md`, que es una dependencia de desarrollo) o que diga cómo seguir.
+  - Lo demás de la 3.1 se puede hacer sin decisión nueva: `components.json`, `src/lib/utils.ts` (la utilidad de composición de clases) y la barra lateral son la salida de la CLI y no traen nada fuera de lo aprobado.
 - [ ] 3.2 Escribir primero `e2e/estructura.spec.ts` (la sección actual se ve destacada, los grupos se distinguen, cada ítem tiene ícono, el logo está arriba y el menú del usuario abajo) y después la barra lateral. Archivos: `e2e/estructura.spec.ts`, `src/components/estructura/barra-lateral.tsx`, `src/components/estructura/secciones.ts`. Verificación: `npx playwright test e2e/estructura.spec.ts` en verde.
 - [ ] 3.3 Escribir primero los casos del encabezado (título de la sección una sola vez por vista; sin acción principal no hay botón ni espacio reservado) y después el encabezado. Archivos: `e2e/estructura.spec.ts`, `src/components/estructura/encabezado.tsx`. Verificación: `npx playwright test e2e/estructura.spec.ts` en verde.
 - [ ] 3.4 Escribir primero `e2e/estructura-390.spec.ts` (CA-4: sin desplazamiento horizontal a 390 px en los dos modos, barra oculta hasta el botón de menú, cajón que se abre y se cierra al elegir o tocar fuera) y después el comportamiento angosto. Archivos: `e2e/estructura-390.spec.ts`, `src/components/estructura/barra-lateral.tsx`. Verificación: `npx playwright test e2e/estructura-390.spec.ts` en verde; medir el ancho del documento con Playwright da 390 px o menos, sin desplazamiento lateral.
