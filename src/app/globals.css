@@ -1,1 +1,6 @@
 @import "tailwindcss";
+@import "./aggility-theme.css";
+
+/* El tema genera sus valores; acá sólo va el variant de modo oscuro por clase
+ * (`dark` en <html>), que es como lo usan las apps de Aggility. */
+@custom-variant dark (&:is(.dark *));
