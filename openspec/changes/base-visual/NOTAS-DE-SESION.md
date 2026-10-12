@@ -6,43 +6,57 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 7 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
-  Vitest, Playwright y `.gitignore`), en 4 commits.
-- En verde, los cuatro: `npx tsc --noEmit`, `npm run lint`, `npm test` y `npx playwright test`.
-- La próxima tarea es la **2.1**. Se retoma con:
+- 15 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
+  Vitest, Playwright y `.gitignore`) y el **grupo 2 completo** (el tema generado desde
+  los tokens), en 12 commits.
+- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
+  `npx playwright test` y `npm run build`.
+- La próxima tarea es la **3.1** (barra lateral con la CLI de shadcn). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
-- El grupo 2 es el generador del tema: la parte delicada del cambio.
+- El tema ya está cableado: `src/app/globals.css` importa la copia del tema y la app
+  carga Inter con `next/font` (pesos 400, 500 y 600).
 
-## Trampas conocidas del grupo 2 (el generador del tema)
+## El generador del tema (grupo 2, ya hecho)
 
-La tarea 2.2 se verifica con `git diff --exit-code sistema/aggility-theme.css`: el
-generador tiene que reproducir el archivo actual **byte a byte**. Su estructura, ya mapeada:
+`scripts/generar-tema.mjs`, sin dependencias. `npm run tema` escribe **dos** archivos con
+el mismo contenido: `sistema/aggility-theme.css` (el publicado) y `src/app/aggility-theme.css`
+(la copia de la app). Estructura del archivo: cabecera con la fecha de `meta.synced`,
+`@theme inline` (3 variables de tipografía, las 10 clases `--text-*`, los 42 `--color-*` y
+los 4 radios derivados del radio base), `:root` (`--radius` primero, después los 42 colores,
+los alias `{foreground}` como `var(--foreground)`) y `.dark` (sólo los que difieren del claro
+más `color-scheme: dark`).
 
-- **Cabecera:** seis líneas de comentario. La fecha sale de `meta.synced` de
-  `tokens.json`, formateada como `dd/mm/aaaa` (`2026-10-12` → `12/10/2026`).
-- **`@theme inline`:** las 3 variables de tipografía (`--font-sans`, `--font-mono`,
-  `--font-heading`), después los 42 `--color-<token>: var(--<token>);` en el orden de
-  `color.tokens`, y al final los 4 radios.
-- **`:root`:** `--radius: 0.625rem;` primero, después los colores en el orden de la
-  fuente. Los alias (`{foreground}`) se emiten como `var(--foreground)`.
-- **`.dark`:** solo los tokens cuyo valor oscuro **difiere** del claro, en el orden de la
-  fuente, y `color-scheme: dark;` al final.
-- **Radios:** `--radius` sale de `radius-lg`; sm, md y xl por proporción 0,6 / 0,8 / 1,4,
-  que dan los 6, 8 y 14 px de la fuente.
-- Para que un test `.ts` pueda importar `scripts/generar-tema.mjs` hace falta
-  `allowJs: true` en `tsconfig.json`; si no, TypeScript no encuentra declaraciones de tipos.
-- El generador escribe **dos** archivos (el canónico de `sistema/` y la copia que consume
-  la app). La copia se crea en la tarea 2.5, no en la 2.2.
+Los tests del tema:
 
-## Otras cosas verificadas que no están en los artefactos
+- `tests/tema/generador.test.ts` — los 42 colores en cada modo, `chart-1` a `chart-8` y los
+  estados `success` y `warning`.
+- `tests/tema/estilos-texto.test.ts` — una clase `text-<estilo>` por estilo de la fuente,
+  con tamaño, alto de línea, peso e interletrado.
+- `tests/tema/radios.test.ts` — los cuatro radios salen del radio base y valen 6, 8, 10 y 14 px.
+- `tests/tema/coincidencia.test.ts` — CA-2: los dos archivos son, línea por línea, lo que el
+  comando genera.
+- `tests/tema/sin-literales.test.ts` — CA-1: ningún literal de color, tamaño de letra ni radio
+  en el código de `src/`.
 
-- TypeScript quedó en **6.0.3**, no en 7.0.2: `typescript-eslint`, que trae
-  `eslint-config-next`, no soporta TS 7 y corta al cargar. Está anotado en `design.md` y
-  debajo de la tarea 1.4.
-- El config de Vitest es `vitest.config.mts` (no `.ts`): con `.ts`, Vite avisa que lo
-  carga como CommonJS.
-- `npm audit` reporta 9 vulnerabilidades altas, todas en el árbol de **desarrollo** del
-  CLI de `shadcn` (`fast-glob`/`ts-morph` vía `@shadcn/registry`). Nada de runtime.
+## Trampas conocidas
+
+- **`allowJs: true` en `tsconfig.json`**: sin eso, un test `.ts` no puede importar el generador
+  `.mjs` (TS7016).
+- **El test de CA-1 excluye los destinos del generador** (los toma de `DESTINOS`). El único
+  archivo de `src/` con colores literales por diseño es la copia del tema, y sus valores los
+  guarda el test de coincidencia.
+- **CA-1 cubre valores literales, no nombres de clases.** Hallazgo para el grupo 5: las clases
+  de la escala por defecto de Tailwind (`text-sm`, `text-3xl` —hoy en `src/app/page.tsx`—) no
+  salen de la fuente, y la CLI de shadcn las usa en los componentes generados. Hay que decidir
+  en la 5.1 si los componentes base se quedan con esa escala o se mapea a los estilos del tema.
+  Ojo: los radios de la herramienta (`rounded-md`, `rounded-lg`) sí salen del tema, porque
+  Tailwind v4 los toma de `--radius-*`.
+- **TypeScript quedó en 6.0.3**, no en 7.0.2: `typescript-eslint`, que trae `eslint-config-next`,
+  no soporta TS 7 y corta al cargar.
+- El config de Vitest es `vitest.config.mts` (no `.ts`): con `.ts`, Vite avisa que lo carga
+  como CommonJS.
+- `npm audit` reporta 9 vulnerabilidades altas, todas en el árbol de **desarrollo** del CLI de
+  `shadcn` (`fast-glob`/`ts-morph` vía `@shadcn/registry`). Nada de runtime.
 
 ## Trampa ya pagada: puertos ocupados por otras apps de Aggility
 
@@ -55,3 +69,11 @@ tests corrieron contra la pantalla `/ingreso` de `aggility-gestion`.
 - Todo test que corra contra el servidor tiene que afirmar algo **propio** de esta app
   (texto o `<title>`), para que un puerto ajeno lo haga fallar en lugar de dar verde.
 - Vale para las tareas 3.4 (390 px), 3.5, el grupo 4 y la 6.1 (capturas).
+
+## Lo que le falta al grupo 3
+
+- La CLI de shadcn (`shadcn@4.21.4`, preset `base-nova`) puede escribir variables de estilo en
+  `globals.css` y en otros archivos: hay que borrarlas y dejar el tema generado, y que
+  `npm test` (el test de coincidencia y el de CA-1) siga en verde.
+- `globals.css` tiene hoy el `@custom-variant dark (&:is(.dark *))` que el encabezado del tema
+  documenta; si la CLI lo agrega de nuevo, hay que dejar una sola declaración.
