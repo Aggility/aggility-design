@@ -179,7 +179,7 @@ Dependencias de desarrollo (no van a producción): `typescript`, `tailwindcss`, 
 | `class-variance-authority` | 0.7.1 | — |
 | `clsx` | 2.1.1 | — |
 | `tailwind-merge` | 3.7.0 | — |
-| `typescript` | 7.0.2 | Respaldo verificado: 6.0.3 (última 6.x) y 5.9.3 (última 5.x) |
+| `typescript` | 6.0.3 | Se descartó 7.0.2 el 12/10/2026: `tsc` y `next build` andan con TS 7, pero `typescript-eslint` (vía `eslint-config-next`) no lo soporta y falla al cargar. 6.0.3 es la última 6.x; 5.9.3 es la última 5.x |
 | `tailwindcss` | 4.3.3 | — |
 | `@tailwindcss/postcss` | 4.3.3 | — |
 | `shadcn` (CLI, desarrollo) | 4.21.4 | Preset `base-nova` disponible; registra los 14 componentes y `sidebar` |
@@ -204,7 +204,7 @@ Para `pantallas-muestra` (no se instala en este cambio, ya verificado): `rechart
 ## Risks / Trade-offs
 
 1. **El tema vive en dos archivos (el canónico y la copia de la app).** → La verificación genera el tema en memoria y compara contra los dos; editar cualquiera de los dos a mano pone la suite en rojo con el archivo y la línea.
-2. **TypeScript 7.0.2 es la versión más nueva y cambia el compilador.** → La primera tarea de código corre `tsc --noEmit` y `npm run build`; si alguno falla, se fija la última 6.x verificada (6.0.3) y la razón queda anotada debajo de la tarea.
+2. **TypeScript 7.0.2 es la versión más nueva y cambia el compilador.** → **Resuelto el 12/10/2026**: `tsc --noEmit` y `npm run build` funcionan con TS 7.0.2, pero `typescript-eslint`, que trae `eslint-config-next`, corta al cargar con `typescript-eslint does not support TS 7.0.`, así que el linter no puede usarse. Se fijó la última 6.x verificada (**6.0.3**), con la razón anotada debajo de la tarea 1.4.
 3. **Un cambio del preset `base-nova` entre versiones del CLI puede traer diferencias al regenerar componentes.** → El CLI se fija en 4.21.4 y regenerar es una tarea explícita; las capturas muestran si algo se movió.
 4. **El modo elegido podría pisarse o verse un destello en el primer pintado.** → La verificación de CA-3 abre la app con el sistema en oscuro y sin elección guardada, y después con una elección guardada de claro.
 5. **La verificación de valores literales puede marcar código generado por la CLI.** → Un literal se corrige con la herramienta oficial, nunca a mano. Las clases de tamaño que no son color, tamaño de letra ni radio (por ejemplo un tamaño de ícono) quedan fuera de CA-1.

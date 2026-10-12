@@ -1,11 +1,23 @@
+# Dependencias y compilación
 node_modules/
 .next/
 out/
-.env*
-!.env.example
+build/
 *.tsbuildinfo
 next-env.d.ts
-test-results/
+
+# Entorno
+.env*
+!.env.example
+
+# Pruebas
+coverage/
 playwright-report/
-.openspec-test-*
+test-results/
+
+# Basura del sistema y del andamiaje
 .DS_Store
+.openspec-test-*
+
+# OJO: docs/capturas/ SI se versiona. Son la prueba visual que revisa Germán
+# antes de archivar un cambio. No agregar una regla que las ignore.

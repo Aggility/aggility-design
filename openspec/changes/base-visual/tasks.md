@@ -4,13 +4,14 @@
 
 **Puerta de Germán**: aprobada el 12/10/2026 — las 9 dependencias de runtime de `design.md` (sección "Dependencias de runtime nuevas") quedan aprobadas tal como están, así que no hay que frenar al llegar acá.
 
-- [ ] 1.1 Crear `package.json` con las versiones exactas de `design.md` y los scripts `dev`, `build`, `start`, `lint`, `test`, `e2e`, `tema` y `capturas` (los dos últimos quedan apuntando a lo que crean 2.2 y 6.1). Verificación: `npm install` sale 0 y `npm ls --depth=0` muestra las versiones exactas fijadas, sin rangos.
-- [ ] 1.2 Crear `tsconfig.json` (estricto, alias de rutas), `src/app/layout.tsx` y `src/app/page.tsx` mínimos. Verificación: `npx tsc --noEmit` y `npm run build` en verde. Si TypeScript 7.0.2 falla con Next 16.4.0, fijar 6.0.3 (verificada en `design.md`) y anotar el motivo acá.
-- [ ] 1.3 Configurar Tailwind v4: `src/app/globals.css` y `postcss.config.mjs`. Verificación: `npm run build` en verde y una clase utilitaria de prueba presente en el CSS compilado.
-- [ ] 1.4 Configurar lint y formato: `eslint.config.mjs` y `.prettierrc`. Verificación: `npm run lint` termina sin errores ni advertencias.
-- [ ] 1.5 Configurar Vitest: `vitest.config.ts` y `tests/humo.test.ts`. Verificación: `npm test` en verde.
-- [ ] 1.6 Configurar Playwright: `playwright.config.ts` y `e2e/humo.spec.ts`. Verificación: `npx playwright test` en verde.
-- [ ] 1.7 Agregar `.gitignore` lo que falte para este stack (`/test-results/`, `/playwright-report/`, `coverage/`) y comprobar que `docs/capturas/` NO queda ignorado. Verificación: `git check-ignore -v test-results/` nombra la regla y `git check-ignore -v docs/capturas/` no devuelve nada.
+- [x] 1.1 Crear `package.json` con las versiones exactas de `design.md` y los scripts `dev`, `build`, `start`, `lint`, `test`, `e2e`, `tema` y `capturas` (los dos últimos quedan apuntando a lo que crean 2.2 y 6.1). Verificación: `npm install` sale 0 y `npm ls --depth=0` muestra las versiones exactas fijadas, sin rangos.
+- [x] 1.2 Crear `tsconfig.json` (estricto, alias de rutas), `src/app/layout.tsx` y `src/app/page.tsx` mínimos. Verificación: `npx tsc --noEmit` y `npm run build` en verde. Si TypeScript 7.0.2 falla con Next 16.4.0, fijar 6.0.3 (verificada en `design.md`) y anotar el motivo acá.
+- [x] 1.3 Configurar Tailwind v4: `src/app/globals.css` y `postcss.config.mjs`. Verificación: `npm run build` en verde y una clase utilitaria de prueba presente en el CSS compilado.
+- [x] 1.4 Configurar lint y formato: `eslint.config.mjs` y `.prettierrc`. Verificación: `npm run lint` termina sin errores ni advertencias.
+  - **Nota (12/10/2026):** TypeScript 7.0.2 quedó descartado. `tsc --noEmit` y `next build` funcionan con TS 7, pero `typescript-eslint`, que usa `eslint-config-next`, no lo soporta y falla al cargar (`typescript-eslint does not support TS 7.0.`). Se fijó **6.0.3**, el respaldo que `design.md` preveía; `tsc`, `next build` y `npm run lint` quedan los tres en verde. `design.md` quedó corregido en el mismo commit.
+- [x] 1.5 Configurar Vitest: `vitest.config.ts` (quedó como `vitest.config.mts`: con la extensión `.ts` Vite avisa que el archivo se carga como CommonJS) y `tests/humo.test.ts`. Verificación: `npm test` en verde.
+- [x] 1.6 Configurar Playwright: `playwright.config.ts` y `e2e/humo.spec.ts`. Verificación: `npx playwright test` en verde.
+- [x] 1.7 Agregar `.gitignore` lo que falte para este stack (`/test-results/`, `/playwright-report/`, `coverage/`) y comprobar que `docs/capturas/` NO queda ignorado. Verificación: `git check-ignore -v test-results/` nombra la regla y `git check-ignore -v docs/capturas/` no devuelve nada.
 
 ## 2. Tema generado desde los tokens
 
