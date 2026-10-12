@@ -27,7 +27,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 import logoNegativo from "../../../sistema/logos/logo-full-negativo.webp";
 import logoPositivo from "../../../sistema/logos/logo-full-positivo.webp";
@@ -48,12 +51,21 @@ function inicialesDe(nombre: string): string {
 }
 
 /**
+ * El botón de menú de las pantallas angostas: abre y cierra el cajón. Vive acá porque es
+ * parte del comportamiento angosto de la barra, y el encabezado lo pone donde va.
+ */
+export function BotonDeMenu({ className }: { className?: string }) {
+  return <SidebarTrigger aria-label="Menú de secciones" className={cn("md:hidden", className)} />;
+}
+
+/**
  * La barra lateral: el logo arriba, las secciones agrupadas con la actual destacada y el
  * menú del usuario abajo. En pantallas angostas es el cajón del mismo bloque.
  */
 export function BarraLateral() {
   const ruta = usePathname();
   const actual = seccionDeLaRuta(ruta);
+  const { setOpenMobile } = useSidebar();
 
   return (
     <Sidebar collapsible="offcanvas">
@@ -85,7 +97,12 @@ export function BarraLateral() {
                             // `foreground`: estas clases pisan las del bloque generado.
                             className="data-active:bg-primary-soft data-active:text-foreground"
                             render={
-                              <Link href={seccion.href} aria-current={esLaActual ? "page" : undefined} />
+                              <Link
+                                href={seccion.href}
+                                aria-current={esLaActual ? "page" : undefined}
+                                // Elegir una sección cierra el cajón de las pantallas angostas.
+                                onClick={() => setOpenMobile(false)}
+                              />
                             }
                           >
                             <seccion.Icono aria-hidden="true" />

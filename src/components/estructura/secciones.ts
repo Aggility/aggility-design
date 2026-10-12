@@ -6,6 +6,8 @@ export interface Seccion {
   titulo: string;
   href: string;
   Icono: LucideIcon;
+  /** La acción principal de esa pantalla, cuando la tiene: el encabezado la muestra. */
+  accion?: { etiqueta: string; href: string };
 }
 
 /** Las secciones agrupadas: la barra lateral muestra un grupo por cada uno. */
@@ -30,7 +32,7 @@ export const GRUPOS: GrupoDeSecciones[] = [
   {
     titulo: "Pantallas de muestra",
     secciones: [
-      { titulo: "Clientes", href: "/clientes", Icono: Users },
+      { titulo: "Clientes", href: "/clientes", Icono: Users, accion: { etiqueta: "Nuevo cliente", href: "/clientes/nuevo" } },
       { titulo: "Nuevo cliente", href: "/clientes/nuevo", Icono: UserPlus },
       { titulo: "Ingreso", href: "/ingreso", Icono: LogIn },
       { titulo: "Estados", href: "/estados", Icono: Layers },

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { BarraLateral } from "@/components/estructura/barra-lateral";
+import { Encabezado } from "@/components/estructura/encabezado";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import "./globals.css";
@@ -28,7 +29,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <SidebarProvider>
           <BarraLateral />
           {/* `SidebarInset` es el `main` de la pantalla: las páginas no llevan otro. */}
-          <SidebarInset>{children}</SidebarInset>
+          <SidebarInset>
+            <Encabezado />
+            {children}
+          </SidebarInset>
         </SidebarProvider>
       </body>
     </html>

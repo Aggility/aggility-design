@@ -1,10 +1,23 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 // A 390 px la barra lateral está oculta hasta tocar el botón de menú: ese comportamiento
 // tiene su propia spec (e2e/estructura-390.spec.ts, tarea 3.4).
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 800, "el ancho angosto se prueba en estructura-390.spec.ts");
 
 const SECCION = "/fundamentos";
+
+/** El color de un valor del tema, resuelto por el navegador: el test no escribe colores. */
+function colorDelTema(page: Page, variable: string): Promise<string> {
+  return page.evaluate((nombre) => {
+    const valor = getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+    const sonda = document.createElement("span");
+    sonda.style.backgroundColor = valor;
+    document.body.append(sonda);
+    const color = getComputedStyle(sonda).backgroundColor;
+    sonda.remove();
+    return color;
+  }, variable);
+}
 
 test.describe("la barra lateral", () => {
   test.beforeEach(async ({ page }) => {
@@ -19,15 +32,7 @@ test.describe("la barra lateral", () => {
     await expect(ajena).not.toHaveAttribute("aria-current", "page");
 
     // El color lo dice el tema, no un valor escrito en el test.
-    const colorDelSistema = await page.evaluate(() => {
-      const delTema = getComputedStyle(document.documentElement).getPropertyValue("--primary-soft").trim();
-      const sonda = document.createElement("span");
-      sonda.style.backgroundColor = delTema;
-      document.body.append(sonda);
-      const color = getComputedStyle(sonda).backgroundColor;
-      sonda.remove();
-      return color;
-    });
+    const colorDelSistema = await colorDelTema(page, "--primary-soft");
 
     await expect(actual).toHaveCSS("background-color", colorDelSistema);
     expect(await ajena.evaluate((elemento) => getComputedStyle(elemento).backgroundColor)).not.toBe(colorDelSistema);
@@ -76,5 +81,56 @@ test.describe("la barra lateral", () => {
     expect(cajaLogo!.y).toBeLessThan(cajaUltimoItem!.y);
     expect(cajaUsuario!.y).toBeGreaterThan(cajaUltimoItem!.y);
     await expect(usuario).toContainText("Camila Duarte");
+  });
+});
+
+test.describe("el encabezado de sección", () => {
+  test("muestra el título de la sección actual y una sola vez en la pantalla", async ({ page }) => {
+    await page.goto(SECCION);
+
+    await expect(page.locator("header").getByRole("heading", { level: 1 })).toHaveText("Fundamentos");
+    await expect(page.getByRole("main").getByText("Fundamentos", { exact: true })).toHaveCount(1);
+    await expect(page.getByRole("main").getByText("Inicio", { exact: true })).toHaveCount(0);
+  });
+
+  test("sigue a la sección cuando la persona cambia de pantalla", async ({ page }) => {
+    await page.goto(SECCION);
+
+    await page.getByRole("link", { name: "Clientes" }).click();
+
+    await expect(page).toHaveURL(/\/clientes$/);
+    await expect(page.locator("header").getByRole("heading", { level: 1 })).toHaveText("Clientes");
+  });
+
+  test("sin acción principal no muestra ningún botón y no deja el espacio reservado", async ({ page }) => {
+    await page.goto(SECCION);
+
+    const encabezado = page.locator("header");
+    await expect(encabezado.getByRole("link")).toHaveCount(0);
+    const altoSinAccion = (await encabezado.boundingBox())!.height;
+
+    await page.goto("/clientes");
+    const altoConAccion = (await encabezado.boundingBox())!.height;
+
+    expect(
+      Math.abs(altoConAccion - altoSinAccion),
+      "el encabezado mide lo mismo con acción y sin acción: no hay un espacio reservado",
+    ).toBeLessThanOrEqual(1);
+  });
+
+  test("con acción principal muestra una sola, y con los colores del sistema", async ({ page }) => {
+    await page.goto("/clientes");
+
+    const accion = page.locator("header").getByRole("link", { name: "Nuevo cliente" });
+    await expect(accion).toBeVisible();
+
+    const primario = await colorDelTema(page, "--primary");
+    await expect(accion).toHaveCSS("background-color", primario);
+
+    const principales = await page
+      .locator("a, button")
+      .evaluateAll((elementos, color) => elementos.filter((el) => getComputedStyle(el).backgroundColor === color).length, primario);
+
+    expect(principales, "la acción del encabezado es la única con el color primario").toBe(1);
   });
 });
