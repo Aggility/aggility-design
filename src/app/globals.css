@@ -1,6 +1,19 @@
 @import "tailwindcss";
 @import "./aggility-theme.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 /* El tema genera sus valores; acá sólo va el variant de modo oscuro por clase
  * (`dark` en <html>), que es como lo usan las apps de Aggility. */
 @custom-variant dark (&:is(.dark *));
+
+/* Base que traen los componentes base de la herramienta: el borde y el anillo
+ * de foco salen del tema, nunca de un valor propio. */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

@@ -139,14 +139,25 @@ Playwright, dos anchos (1280 y 390), el modo forzado por clase, un archivo por p
 Una verificación recorre el código de la aplicación y falla ante un color literal (hexadecimal, rgb, hsl u oklch), un tamaño de letra o un radio literal, nombrando archivo y línea.
 
 - **Alternativa descartada:** revisar el diff a ojo en cada cambio. No es rojo o verde y depende de que quien revise tenga el criterio del sistema en la cabeza.
+- **Alcance:** el código que genera la CLI de shadcn (`src/components/ui/`, `src/hooks/`) queda afuera, porque no se escribe a mano y el preset trae valores propios (por ejemplo `text-[0.8rem]`). Decisión de Germán del 12/10/2026 (ver 16). Los archivos que el generador del tema escribe también quedan afuera, y sus valores los guarda la decisión 4.
 - **Lo exige:** CA-1, regla 2, y la regla del apply ("Nunca uses un color, tamaño de letra o radio literal en src/").
 
 ### 15. Documentos que se corrigen en este cambio
 
-El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.md` completa la sección "Estructura y comandos del proyecto", que quedó como pendiente.
+El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.md` completa la sección "Estructura y comandos del proyecto", que quedó como pendiente. `sistema/guia.md` se ajusta en dos puntos, por la decisión 16: el anillo de foco de los componentes base y su escala de texto.
 
 - **Alternativa descartada:** dejarlo para después. El config de OpenSpec dice que si el código tiene razón y un documento quedó viejo, se corrige el documento en el mismo commit.
 - **Lo exige:** regla 5, y `AGENTS.md` (última línea).
+
+### 16. El código de los componentes base se toma tal cual del preset
+
+`components.json`, `src/lib/utils.ts`, `src/components/ui/*` (la barra lateral y las piezas que trae: botón, campo, separador, esqueleto, tooltip y cajón) y `src/hooks/use-mobile.ts` se quedan como los escribe el preset `base-nova`, sin editar a mano. De lo que escribe la CLI sólo se reemplaza lo que manda la tarea: las variables de estilo de `globals.css` se borran y queda el tema generado. Además hizo falta crear `next.config.ts` (vacío), porque el CLI detecta Next.js por la existencia de `next.config.*`.
+
+- **Consecuencias aceptadas** (decisión de Germán del 12/10/2026, sobre la salida real del preset):
+  1. El test de literales y el lint dejan afuera ese código (decisión 14 y `eslint.config.mjs`). El motivo es concreto: el preset usa `text-[0.8rem]` y `rounded-[min(var(--radius-md),10px)]` en el botón, y su hook de pantalla angosta llama `setState` dentro de un efecto, que la regla de React del linter marca.
+  2. La guía visual se ajusta al preset en dos puntos: los componentes base usan el anillo de foco con `ring-3` y `ring-ring/50` (no el anillo de 2px) y su propia escala de texto (`text-sm`, `text-xs`, `text-base`, no los estilos de la fuente).
+- **Alternativa descartada:** ajustar a mano los componentes generados para que cumplan CA-1, la regla 2 y la guía. Va contra la decisión 11 (nunca a mano) y cada regeneración con la CLI volvería a traer las diferencias.
+- **Lo exige:** sección 5.4 y la regla del config ("Los componentes base se generan con la CLI oficial de shadcn, nunca a mano").
 
 ## Dependencias de runtime nuevas (aprobadas por Germán el 12/10/2026)
 
@@ -159,8 +170,7 @@ El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.
 | `lucide-react` | 1.55.0 | Íconos, como pide la guía visual. | — |
 | `next-themes` | 0.4.6 | Modo claro/oscuro con memoria del dispositivo (CA-3). | Implementarlo a mano (decisión 9). |
 | `class-variance-authority` | 0.7.1 | Variantes de los componentes base. Lo trae el preset. | — |
-| `clsx` | 2.1.1 | Composición de clases. Lo trae el preset. | — |
-| `tailwind-merge` | 3.7.0 | Composición de clases sin conflictos. Lo trae el preset. | — |
+| `cn` | 0.4.0 | Composición de clases de los componentes base (`src/lib/utils.ts` la reexporta). Es la que trae el preset `base-nova`; reemplaza a `clsx` + `tailwind-merge`. Aprobada por Germán el 12/10/2026. | `clsx` + `tailwind-merge` (2.1.1 y 3.7.0): es lo que `design.md` había supuesto, pero la utilidad la trae la CLI y no se escribe a mano (decisión 11). Quedaron sin uso y se sacaron. |
 
 No hay ninguna dependencia de datos ni de autenticación: los datos son de ejemplo y las pantallas de este cambio no usan datos.
 
@@ -177,8 +187,7 @@ Dependencias de desarrollo (no van a producción): `typescript`, `tailwindcss`, 
 | `lucide-react` | 1.55.0 | `react` `^16.5.1 \|\| ^17 \|\| ^18 \|\| ^19` |
 | `next-themes` | 0.4.6 | `react` y `react-dom` `^19` |
 | `class-variance-authority` | 0.7.1 | — |
-| `clsx` | 2.1.1 | — |
-| `tailwind-merge` | 3.7.0 | — |
+| `cn` | 0.4.0 | Sin dependencias ni dependencias entre pares. Es la utilidad de clases del preset `base-nova`; el CLI trae su propia copia (0.2.6), que es de desarrollo y no entra en la app |
 | `typescript` | 6.0.3 | Se descartó 7.0.2 el 12/10/2026: `tsc` y `next build` andan con TS 7, pero `typescript-eslint` (vía `eslint-config-next`) no lo soporta y falla al cargar. 6.0.3 es la última 6.x; 5.9.3 es la última 5.x |
 | `tailwindcss` | 4.3.3 | — |
 | `@tailwindcss/postcss` | 4.3.3 | — |
@@ -208,7 +217,7 @@ Para `pantallas-muestra` (no se instala en este cambio, ya verificado): `rechart
 2. **TypeScript 7.0.2 es la versión más nueva y cambia el compilador.** → **Resuelto el 12/10/2026**: `tsc --noEmit` y `npm run build` funcionan con TS 7.0.2, pero `typescript-eslint`, que trae `eslint-config-next`, corta al cargar con `typescript-eslint does not support TS 7.0.`, así que el linter no puede usarse. Se fijó la última 6.x verificada (**6.0.3**), con la razón anotada debajo de la tarea 1.4.
 3. **Un cambio del preset `base-nova` entre versiones del CLI puede traer diferencias al regenerar componentes.** → El CLI se fija en 4.21.4 y regenerar es una tarea explícita; las capturas muestran si algo se movió.
 4. **El modo elegido podría pisarse o verse un destello en el primer pintado.** → La verificación de CA-3 abre la app con el sistema en oscuro y sin elección guardada, y después con una elección guardada de claro.
-5. **La verificación de valores literales puede marcar código generado por la CLI.** → Un literal se corrige con la herramienta oficial, nunca a mano. Las clases de tamaño que no son color, tamaño de letra ni radio (por ejemplo un tamaño de ícono) quedan fuera de CA-1.
+5. **La verificación de valores literales puede marcar código generado por la CLI.** → **Resuelto el 12/10/2026:** el código de la herramienta queda afuera de la verificación (decisión 14) y el preset se toma tal cual (decisión 16). Se comprobó que corregirlo "con la herramienta oficial" no se puede: `text-[0.8rem]` y `rounded-[min(var(--radius-md),10px)]` salen así del preset `base-nova`. Las clases de tamaño que no son color, tamaño de letra ni radio (por ejemplo un tamaño de ícono) nunca estuvieron dentro de CA-1.
 6. **Un componente que falte de la lista de la sección 5.4.** → Queda anotado como bloqueo debajo de la tarea y se frena; no se escribe a mano (regla del apply).
 7. **Las capturas dependen de que la tipografía cargue.** → El comando espera a que la tipografía esté lista antes de capturar y falla con un mensaje que lo dice, en lugar de dejar capturas con la fuente de reserva.
 

@@ -16,6 +16,13 @@ const SRC = path.join(RAIZ, "src");
  */
 const GENERADOS = new Set(DESTINOS.map((destino) => path.resolve(destino)));
 
+/**
+ * El código que genera la CLI de shadcn tampoco se revisa: no se escribe a mano y
+ * el preset trae valores propios (por ejemplo `text-[0.8rem]`). Decisión de Germán
+ * del 12/10/2026 (ver la decisión 16 y el riesgo 5 de `design.md`).
+ */
+const DE_LA_HERRAMIENTA = ["components/ui", "hooks"].map((carpeta) => path.join(SRC, carpeta));
+
 /** El código de la app. Los logos y demás imágenes no son texto y quedan afuera. */
 const EXTENSIONES = [".ts", ".tsx", ".mjs", ".js", ".jsx", ".css"];
 
@@ -87,10 +94,11 @@ function archivosDe(carpeta: string): string[] {
 const revisados = archivosDe(SRC)
   .map((archivo) => path.resolve(archivo))
   .filter((archivo) => !GENERADOS.has(archivo))
+  .filter((archivo) => !DE_LA_HERRAMIENTA.some((carpeta) => archivo.startsWith(`${carpeta}${path.sep}`)))
   .sort();
 
 describe("ningún valor visual literal en el código de la app (CA-1)", () => {
-  it("revisa el código de `src/` y deja afuera lo que escribe el comando", () => {
+  it("revisa el código de `src/` y deja afuera lo que escribe el comando y lo que genera la CLI", () => {
     const relativos = revisados.map((archivo) => path.relative(RAIZ, archivo));
 
     expect(relativos).toContain(path.join("src", "app", "layout.tsx"));
@@ -98,6 +106,8 @@ describe("ningún valor visual literal en el código de la app (CA-1)", () => {
     expect(relativos).toContain(path.join("src", "app", "globals.css"));
     expect(relativos.filter((relativo) => GENERADOS.has(path.join(RAIZ, relativo)))).toEqual([]);
     expect(relativos).not.toContain(path.join("src", "app", "aggility-theme.css"));
+    expect(relativos).not.toContain(path.join("src", "components", "ui", "button.tsx"));
+    expect(relativos).not.toContain(path.join("src", "hooks", "use-mobile.ts"));
   });
 
   it("reconoce los literales que tiene que reconocer", () => {

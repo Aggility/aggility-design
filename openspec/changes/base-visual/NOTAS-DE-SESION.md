@@ -6,18 +6,14 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 15 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
-  Vitest, Playwright y `.gitignore`) y el **grupo 2 completo** (el tema generado desde
-  los tokens), en 12 commits.
+- 16 de 42 tareas hechas: el grupo 1 completo (proyecto, estructura, Tailwind, lint,
+  Vitest, Playwright y `.gitignore`), el **grupo 2 completo** (el tema generado desde
+  los tokens) y la **3.1** (el bloque de barra lateral y los componentes base con la CLI
+  oficial de shadcn, con las decisiones de Germán del 12/10/2026 ya aplicadas).
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
-  `npx playwright test` y `npm run build`.
-- **La próxima tarea es la 3.1 y está FRENADA a mitad de camino**: la CLI de shadcn ya
-  corrió (`init -d` + `add sidebar -y`) y su salida **está en el árbol de trabajo sin
-  commitear**. Quedan cuatro puntos para decidir con Germán (el paquete `cn`, el test de
-  CA-1 contra el código generado, un error de lint en `use-mobile.ts` y el anillo de foco
-  + la escala de texto contra la guía). Está todo con evidencia debajo de la tarea en
-  `tasks.md`. Se retoma con:
-  `openspec instructions apply --change "base-visual" --json`
+  `npx playwright test` (2/2) y `npm run build`.
+- La próxima tarea es la **3.2** (la barra lateral propia, con su test e2e primero). Se
+  retoma con: `openspec instructions apply --change "base-visual" --json`
 - El tema ya está cableado: `src/app/globals.css` importa la copia del tema y la app
   carga Inter con `next/font` (pesos 400, 500 y 600).
 
@@ -92,3 +88,10 @@ tests corrieron contra la pantalla `/ingreso` de `aggility-gestion`.
   pero sí traen valores propios de tamaño de letra y radio (el test de CA-1 los marca) y la
   escala de texto por defecto de la herramienta (`text-sm`, `text-xs`). `use-mobile.ts` trae
   un error de lint. Todo eso está con evidencia en `tasks.md`, bajo la 3.1.
+- **Las decisiones ya están tomadas** (Germán, 12/10/2026; ver la decisión 16 de
+  `design.md`): el código de la herramienta se toma tal cual, el test de literales y el lint
+  lo dejan afuera (`src/components/ui/**` y `src/hooks/**`), y `sistema/guia.md` se ajustó al
+  preset en el anillo de foco y en la escala de texto. Si se vuelve a correr la CLI —por
+  ejemplo para agregar otro componente— hay que restaurar otra vez `globals.css` y
+  `layout.tsx` y correr `npm test` (el test de coincidencia de CA-2 avisa si el tema quedó
+  pisado).
