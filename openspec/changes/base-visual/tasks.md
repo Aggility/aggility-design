@@ -86,6 +86,7 @@ Cubre la capacidad `pantalla-fundamentos` (sección 5.2, guía visual).
 - **Puerta de Germán**: revisar el diff y las capturas de `docs/capturas/` y aprobar antes de archivar.
 - Archivar el cambio recién cuando Germán aprueba.
 - Al cerrar, un modelo más fuerte, en otra sesión, revisa `verificacion.md` y las capturas contra la spec.
+- Borrar `openspec/changes/base-visual/NOTAS-DE-SESION.md` (notas temporales de la sesión del 12/10/2026) antes de archivar el cambio.
 - Commit por tarea, con el número de la tarea en el mensaje. Nunca push ni deploy sin que Germán lo pida.
 
 ## Trazabilidad requisito → tareas
