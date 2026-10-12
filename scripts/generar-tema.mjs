@@ -130,6 +130,57 @@ function enFamiliaCargada(familia) {
   return variable ? [variable, ...resto].join(",") : familia;
 }
 
+/** Los estilos de texto de la fuente: los de interfaz, los de datos y el de marca. */
+function estilosDe(fuente) {
+  const grupos = fuente?.type?.groups;
+
+  if (!Array.isArray(grupos) || grupos.length === 0) {
+    throw new Error("La fuente de valores no trae estilos de texto (type.groups).");
+  }
+
+  const estilos = [];
+
+  for (const grupo of grupos) {
+    for (const estilo of grupo?.styles ?? []) {
+      const { name, fontSize, lineHeight, fontWeight, letterSpacing } = estilo ?? {};
+
+      if (typeof name !== "string" || name === "") {
+        throw new Error(`La fuente de valores trae un estilo de texto sin nombre en el grupo ${grupo?.name}.`);
+      }
+
+      const medidas = { fontSize, lineHeight, fontWeight };
+
+      for (const [campo, valor] of Object.entries(medidas)) {
+        if (valor === undefined || valor === null || valor === "") {
+          throw new Error(`Al estilo ${name} le falta ${campo} en la fuente de valores.`);
+        }
+      }
+
+      estilos.push({ name, fontSize, lineHeight, fontWeight, letterSpacing });
+    }
+  }
+
+  if (estilos.length === 0) {
+    throw new Error("La fuente de valores no trae ningún estilo de texto (type.groups[].styles).");
+  }
+
+  return estilos;
+}
+
+/**
+ * Cada estilo entra como una clase de texto de Tailwind v4 (`--text-page-title`
+ * es `text-page-title`) con su alto de línea, su peso y —si la fuente lo define—
+ * su interletrado.
+ */
+function lineasDeEstilos(fuente) {
+  return estilosDe(fuente).flatMap(({ name, fontSize, lineHeight, fontWeight, letterSpacing }) => [
+    `--text-${name}: ${fontSize};`,
+    `--text-${name}--line-height: ${lineHeight};`,
+    `--text-${name}--font-weight: ${fontWeight};`,
+    ...(typeof letterSpacing === "string" && letterSpacing !== "" ? [`--text-${name}--letter-spacing: ${letterSpacing};`] : []),
+  ]);
+}
+
 /** El radio base en rem, desde `radius-lg` de la fuente. */
 function radioBaseDe(fuente) {
   const tokens = fuente?.radius?.tokens ?? [];
@@ -163,6 +214,7 @@ export function generarTema(fuente) {
     "",
     "@theme inline {",
     ...tipografiaDe(fuente).map((linea) => `  ${linea}`),
+    ...lineasDeEstilos(fuente).map((linea) => `  ${linea}`),
     ...colores.map((token) => `  --color-${token.name}: var(--${token.name});`),
     ...RADIOS.map(({ nombre, proporcion }) =>
       proporcion === 1
