@@ -116,9 +116,6 @@ In both branches, never create the root as a side effect: do not run `openspec i
    **Pause if:**
    - Task is unclear → ask for clarification
    - Implementation reveals a design issue → suggest updating artifacts
-   - A task's own command (scaffolder CLI, installer, generator) would add a package, file,
-     or version change the change's artifacts do not name → pre-flight what it will install
-     and write, record it under the task, and ask before running it
    - A task needs work beyond what the spec and tasks describe, or you are tempted to drop, narrow, defer, or accept exceptions to specified behavior to make it fit → surface the added scope and ask; do not absorb it silently
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
@@ -200,20 +197,6 @@ What would you like to do?
 - Consider every guidance entry; explain any inapplicable or conflicting advice
 - Do not copy runtime context or operation guidance into implementation files or planning artifacts
 - Preserve CLI-controlled blocked/ready/all-done behavior and completion criteria
-- Pre-flight a task's external CLI before running it: read what it installs and writes from
-  the tool's registry metadata, use the tool's own `--dry-run` when it has one, and compare
-  against the change's approved dependency list. A scaffold tool rewriting files the project
-  owns (its stylesheet, its root layout, its exact version pins) is normal, not a failure:
-  restore them in the same task and list which ones you restored.
-- Write a blocker into the task file itself — the evidence (exact finding, file and line),
-  the options, and the command that reverts the attempt — before asking, and leave the tree
-  in a state the user can inspect. Annotate first, ask second.
-- A task whose test cannot start red because an earlier task already emitted the behavior:
-  say so in the task note and prove the assertion by mutation (break the constant, watch it
-  go red, revert). Never write that a test started red when it did not.
-- When a tool's generated output cannot satisfy the project's own checks (a no-literal scan,
-  the linter), the resolution is a decision recorded in the design artifact — never a
-  hand-edit of generated code, which the next run of the tool undoes.
 
 **Fluid Workflow Integration**
 
