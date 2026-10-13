@@ -31,7 +31,7 @@ Sistema visual común a todas las herramientas de Aggility: el panel de gestión
 - En pantallas: `page-title` una vez por vista, `section-title` y `card-title` para agrupar, `body` para el resto, `small` y `label` para notas y rótulos.
 - Los valores de KPI van en `kpi-value` con cifras tabulares (`font-variant-numeric: tabular-nums`), y su variación en `kpi-delta`.
 - `display` solo en piezas de marca.
-- Los componentes base (botón, campo, menú, tabla) traen su propia escala de texto de la herramienta (`text-sm`, `text-xs`, `text-base`). Los diez estilos de arriba son los que usan las pantallas y los componentes propios.
+- Los componentes base de shadcn (botón, campo, menú, tabla) traen su propia escala de texto (`text-sm`, `text-xs`, `text-base`) y no se editan. Los estilos de arriba son los de las pantallas y los componentes propios.
 
 ## Espacio y forma
 
@@ -42,7 +42,7 @@ Sistema visual común a todas las herramientas de Aggility: el panel de gestión
 
 ## Estados y foco
 
-- Foco de teclado siempre visible y en el color `ring`. Los componentes base (botón, campo, menú, barra lateral) lo dibujan como los trae la herramienta: `ring-3` con `ring-ring/50` y el borde en `ring`. Lo que se arme a mano usa el mismo color de `ring`. Ningún control queda sin foco, y el foco nunca se marca sólo con un cambio de color.
+- Foco de teclado: anillo sólido de 2px en `ring`, separado 2px del elemento con el color de fondo. Lo pone una regla global (`:focus-visible`) en el CSS de cada app, porque el halo que traen los componentes de shadcn (`ring` al 50%) no llega a 3:1 sobre fondo claro. Los componentes no se editan.
 - `border` e `input` no llegan a 3:1 contra el fondo: un campo se reconoce también por su etiqueta y por el foco, nunca solo por el borde.
 - Esqueletos de carga en `muted`; estados vacíos con una línea que dice qué va a aparecer y la acción para empezar.
 
