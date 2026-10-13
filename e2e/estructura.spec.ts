@@ -65,7 +65,9 @@ test.describe("la barra lateral", () => {
   });
 
   test("el logo queda arriba y el menú del usuario abajo", async ({ page }) => {
-    const logo = page.getByRole("img", { name: "Aggility" });
+    // Exacto: en la pantalla de fundamentos también hay logos, con nombres accesibles que contienen
+    // "Aggility" (los describe la guía). Este es el de la barra lateral, que se llama así y nada más.
+    const logo = page.getByRole("img", { name: "Aggility", exact: true });
     const usuario = page.getByRole("button", { name: "Menú de Camila Duarte" });
     const ultimoItem = page.getByRole("link", { name: "Estados" });
 

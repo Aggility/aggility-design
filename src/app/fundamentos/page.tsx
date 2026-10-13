@@ -2,6 +2,7 @@ import fuente from "../../../sistema/tokens.json";
 
 import { EspacioYRadios, type MedidaDeLaEscala } from "@/components/fundamentos/espacio-y-radios";
 import { EstilosDeTexto, type EstiloDeTexto } from "@/components/fundamentos/estilos-de-texto";
+import { Logos } from "@/components/fundamentos/logos";
 import { SeriesYEstados, type SerieDeGrafico } from "@/components/fundamentos/series-y-estados";
 import { TablaDeColores, type ColorDeLaTabla } from "@/components/fundamentos/tabla-de-colores";
 
@@ -69,6 +70,16 @@ export default function Fundamentos() {
         </p>
 
         <SeriesYEstados series={SERIES} />
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-section-title">Logos</h2>
+        <p className="text-body text-muted-foreground">
+          Los logos de la marca, cada uno sobre el fondo que le corresponde y con su regla de uso.
+          Los isotipos van en un espacio cuadrado.
+        </p>
+
+        <Logos />
       </section>
     </div>
   );

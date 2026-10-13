@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
@@ -43,6 +43,14 @@ const ESTADOS: Color[] = FUENTE.color.tokens.filter((token: Color) =>
 );
 const MODOS = { claro: "light", oscuro: "dark" } as const;
 
+/**
+ * Los logos que la guía manda mostrar: **los archivos de `sistema/logos/`**, leídos de la carpeta
+ * para que ninguno quede afuera de la pantalla (y para que no aparezca uno que no existe).
+ */
+const LOGOS = readdirSync(path.join(RAIZ, "sistema", "logos"))
+  .filter((archivo) => /\.(png|webp|svg|jpe?g)$/i.test(archivo))
+  .sort();
+
 /** El valor que la fuente define para un modo. */
 function valorEn(color: Color, modo: keyof typeof MODOS): string {
   return typeof color.value === "string" ? color.value : color.value[MODOS[modo]];
@@ -63,6 +71,18 @@ function canales(page: Page, color: string): Promise<string> {
 
     return [...pincel.getImageData(0, 0, 1, 1).data].join();
   }, color);
+}
+
+/** La luminancia relativa de unos canales RGBA: sirve para decir si un fondo es claro u oscuro. */
+function luminancia(canales: string): number {
+  const [rojo, verde, azul] = canales.split(",").map(Number).slice(0, 3);
+  const canal = (valor: number): number => {
+    const proporcion = valor / 255;
+
+    return proporcion <= 0.03928 ? proporcion / 12.92 : ((proporcion + 0.055) / 1.055) ** 2.4;
+  };
+
+  return 0.2126 * canal(rojo) + 0.7152 * canal(verde) + 0.0722 * canal(azul);
 }
 
 /** Entra a la pantalla y fija el modo del sistema, que es el que la app sigue de entrada. */
@@ -542,5 +562,142 @@ test.describe("las series de gráfico y los estados de fundamentos", () => {
       deSeries.filter((color) => deEstados.includes(color)),
       "ninguna serie se pinta con el color de un estado",
     ).toEqual([]);
+  });
+});
+
+test.describe("los logos de fundamentos", () => {
+  /** Deja los logos a la vista y espera a que sus imágenes terminen de cargar (o de fallar). */
+  async function verLosLogos(page: Page): Promise<void> {
+    await page.locator("[data-logo]").first().scrollIntoViewIfNeeded();
+
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll("[data-logo] img")].every((imagen) =>
+        (imagen as HTMLImageElement).complete,
+      ),
+    );
+  }
+
+  test("cada logo de la carpeta se ve como imagen, sin deformarlo ni recolorearlo", async ({ page }) => {
+    // El contrato: cada logo es un `li` con `data-logo="<archivo>"` que muestra la imagen y un
+    // marco con `data-fondo`.
+    await abrirEn(page, "claro");
+    await verLosLogos(page);
+
+    const enPantalla = await page
+      .locator("[data-logo]")
+      .evaluateAll((filas) => filas.map((fila) => fila.getAttribute("data-logo")));
+
+    expect([...enPantalla].sort(), "los logos de sistema/logos, ni uno más ni uno menos").toEqual(LOGOS);
+
+    const faltantes: string[] = [];
+
+    for (const archivo of LOGOS) {
+      const visto = await page.locator(`[data-logo="${archivo}"] img`).evaluate((el) => {
+        const imagen = el as HTMLImageElement;
+        const dibujado = getComputedStyle(imagen);
+        const caja = imagen.getBoundingClientRect();
+
+        return {
+          src: imagen.getAttribute("src") ?? "",
+          natural: [imagen.naturalWidth, imagen.naturalHeight],
+          mostrado: [Math.round(caja.width), Math.round(caja.height)],
+          filtro: `${dibujado.filter} / ${dibujado.mixBlendMode} / ${dibujado.opacity}`,
+        };
+      });
+
+      // El nombre del archivo viaja dentro de la URL de la imagen: si muestra otro logo, se ve acá.
+      if (!visto.src.includes(archivo.replace(/\.[a-z]+$/i, ""))) {
+        faltantes.push(`${archivo}: muestra otra imagen (${visto.src})`);
+      }
+
+      if (visto.natural[0] === 0) {
+        faltantes.push(`${archivo}: la imagen no carga`);
+        continue;
+      }
+
+      if (visto.filtro !== "none / normal / 1") {
+        faltantes.push(`${archivo}: se le aplica algo al pintarlo (${visto.filtro})`);
+      }
+
+      // Sin deformar: la proporción que muestra es la del archivo.
+      const delArchivo = visto.natural[0] / visto.natural[1];
+      const dibujada = visto.mostrado[0] / visto.mostrado[1];
+
+      if (visto.mostrado[1] === 0 || Math.abs(delArchivo - dibujada) > 0.05) {
+        faltantes.push(
+          `${archivo}: se muestra deformado (${dibujada.toFixed(2)} contra ${delArchivo.toFixed(2)} del archivo)`,
+        );
+      }
+    }
+
+    expect(faltantes, "cada logo es su imagen, entera y sin retocar").toEqual([]);
+  });
+
+  test("cada logo se ve sobre el fondo que la guía le da, en los dos modos", async ({ page }) => {
+    for (const modo of ["claro", "oscuro"] as const) {
+      await abrirEn(page, modo);
+
+      const fallas: string[] = [];
+
+      for (const archivo of LOGOS) {
+        const fondo = await page
+          .locator(`[data-logo="${archivo}"] [data-fondo]`)
+          .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+        const luz = luminancia(await canales(page, fondo));
+        // La guía: el positivo va sobre fondo claro; el negativo, el blanco y los isotipos (los dos
+        // son blancos) van sobre fondo oscuro o sobre el azul de marca.
+        const vaSobreClaro = archivo.includes("positivo");
+
+        if (vaSobreClaro !== luz > 0.5) {
+          fallas.push(`${archivo}: la guía dice fondo claro (${vaSobreClaro}) y el fondo mide ${luz.toFixed(2)}`);
+        }
+      }
+
+      expect(fallas, `en ${modo}, cada logo sobre el fondo que le toca`).toEqual([]);
+    }
+  });
+
+  test("el isotipo se ve en un espacio cuadrado, y no el logo completo en su lugar", async ({ page }) => {
+    await abrirEn(page, "claro");
+    await verLosLogos(page);
+
+    const isotipos = LOGOS.filter((archivo) => archivo.startsWith("iso-"));
+    const completos = LOGOS.filter((archivo) => archivo.startsWith("logo-"));
+
+    expect(isotipos.length, "la carpeta tiene isotipos").toBeGreaterThan(0);
+
+    for (const archivo of isotipos) {
+      const marco = await page.locator(`[data-logo="${archivo}"] [data-fondo]`).evaluate((el) => {
+        const caja = el.getBoundingClientRect();
+
+        return { ancho: Math.round(caja.width), alto: Math.round(caja.height) };
+      });
+
+      expect(Math.abs(marco.ancho - marco.alto), `el espacio de ${archivo} es cuadrado`).toBeLessThanOrEqual(1);
+
+      // El isotipo es cuadrado y el logo completo no: si acá hubiera un logo completo, se vería.
+      const natural = await page
+        .locator(`[data-logo="${archivo}"] img`)
+        .evaluate((el) => {
+          const imagen = el as HTMLImageElement;
+
+          return [imagen.naturalWidth, imagen.naturalHeight];
+        });
+
+      expect(natural[0] / natural[1], `${archivo} es el isotipo, no un logo completo`).toBeLessThan(1.2);
+    }
+
+    for (const archivo of completos) {
+      const natural = await page
+        .locator(`[data-logo="${archivo}"] img`)
+        .evaluate((el) => {
+          const imagen = el as HTMLImageElement;
+
+          return [imagen.naturalWidth, imagen.naturalHeight];
+        });
+
+      expect(natural[0] / natural[1], `${archivo} es un logo completo`).toBeGreaterThan(2);
+    }
   });
 });
