@@ -20,10 +20,10 @@ La pantalla SHALL mostrar cada color del tema con su nombre, su valor y para qu�
 - **WHEN** la persona cambia el modo
 - **THEN** los valores que se muestran son los del modo activo, y se puede seguir viendo qué color es
 
-#### Scenario: Un color que solo existe en un modo
+#### Scenario: Un color de marca con un solo valor
 
-- **WHEN** un color tiene valor en un solo modo
-- **THEN** la pantalla lo indica, en lugar de mostrar un valor vacío (CA-3)
+- **WHEN** la persona mira un color de marca, que tiene un solo valor para los dos modos
+- **THEN** lo ve con ese mismo valor en claro y en oscuro, junto a los que sí cambian de modo
 
 ### Requirement: Estilos de texto
 

@@ -70,35 +70,61 @@ test.describe("la tabla de colores de fundamentos", () => {
   });
 
   test("los valores que se muestran son los del modo activo", async ({ page }) => {
+    // Se busca un color que de verdad cambie entre modos: hay colores del tema que valen lo mismo
+    // en claro y en oscuro, y con esos el caso no probaría nada.
+    const cambia = COLORES.find((color) => valorEn(color, "claro") !== valorEn(color, "oscuro"));
+
+    expect(cambia, "la fuente tiene colores que cambian de valor entre modos").toBeTruthy();
+
     await abrirEn(page, "claro");
 
-    const primarioEnClaro = await page.locator('[data-color="primary"] [data-valor]').innerText();
+    await expect(page.locator(`[data-color="${cambia!.name}"] [data-valor]`), "el valor del modo claro").toHaveText(
+      valorEn(cambia!, "claro"),
+    );
 
     await page.emulateMedia({ colorScheme: "dark" });
     await page.reload();
 
-    const primarioEnOscuro = await page.locator('[data-color="primary"] [data-valor]').innerText();
-
-    expect(primarioEnClaro.trim(), "el valor del modo claro").toBe(valorEn(COLORES.find((c) => c.name === "primary")!, "claro"));
-    expect(primarioEnOscuro.trim(), "y el del modo oscuro").toBe(valorEn(COLORES.find((c) => c.name === "primary")!, "oscuro"));
-    expect(primarioEnOscuro, "cambia al cambiar el modo").not.toBe(primarioEnClaro);
+    await expect(page.locator(`[data-color="${cambia!.name}"] [data-valor]`), "y el del modo oscuro").toHaveText(
+      valorEn(cambia!, "oscuro"),
+    );
 
     // Cambiar de modo no puede borrar la tabla: se sigue viendo qué color es cada uno.
     await expect(page.locator("[data-color]")).toHaveCount(COLORES.length);
-    await expect(page.locator('[data-color="primary"]')).toContainText("primary");
+    await expect(page.locator(`[data-color="${cambia!.name}"]`)).toContainText(cambia!.name);
   });
 
-  test("ningún color queda con el valor vacío", async ({ page }) => {
+  test("un color de marca con un solo valor se ve igual en los dos modos", async ({ page }) => {
+    // Los colores de marca valen lo mismo en claro y en oscuro: la pantalla tiene que mostrarlos
+    // con ese único valor en los dos modos, junto a los que sí cambian.
+    const deMarca = COLORES.filter((color) => typeof color.value === "string");
+
+    expect(deMarca.length, "la fuente tiene colores de marca con un solo valor").toBeGreaterThan(0);
+
+    const leidos = new Map<string, Record<string, string>>();
+
     for (const modo of ["claro", "oscuro"] as const) {
       await abrirEn(page, modo);
 
-      const vacios = await page
-        .locator("[data-color] [data-valor]")
-        .evaluateAll((elementos) =>
-          elementos.map((el) => el.textContent?.trim() ?? "").filter((texto) => texto === ""),
-        );
+      for (const color of deMarca) {
+        const valor = (await page.locator(`[data-color="${color.name}"] [data-valor]`).innerText()).trim();
 
-      expect(vacios, `en ${modo} no puede haber valores vacíos`).toEqual([]);
+        leidos.set(color.name, { ...leidos.get(color.name), [modo]: valor });
+      }
     }
+
+    const fallas = deMarca
+      .filter((color) => {
+        const visto = leidos.get(color.name);
+
+        return visto?.claro !== valorEn(color, "claro") || visto?.oscuro !== visto?.claro;
+      })
+      .map((color) => {
+        const visto = leidos.get(color.name);
+
+        return `${color.name}: en claro "${visto?.claro}" y en oscuro "${visto?.oscuro}" (la fuente dice "${valorEn(color, "claro")}")`;
+      });
+
+    expect(fallas, "los colores de marca valen lo mismo en los dos modos").toEqual([]);
   });
 });

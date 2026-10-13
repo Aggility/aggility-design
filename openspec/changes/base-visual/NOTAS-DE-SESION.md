@@ -6,16 +6,16 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 32 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
+- 33 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
   el **grupo 3 completo** (el armazón), el **grupo 4 completo** (el modo claro y oscuro), el
-  **grupo 5 completo** (los 14 componentes base, su inventario, su teclado y los estados) y el
-  **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas).
+  **grupo 5 completo** (los 14 componentes base, su inventario, su teclado y los estados), el
+  **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas) y la
+  **7.1** (la tabla de colores de fundamentos).
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (30 tests, 10 archivos),
   `npx playwright test` (34 pasan) y `npm run build`.
-- La próxima tarea es la **7.1**, que quedó a mitad: el test (`e2e/fundamentos.spec.ts`) está
-  escrito y **en rojo** por el motivo correcto, falta la tabla de colores
-  (`src/components/fundamentos/tabla-de-colores.tsx` + cablearla en la página). Después siguen
-  7.2 a 7.6 y el cierre (grupo 8). Se retoma con:
+- La próxima tarea es la **7.2** (los estilos de texto en la pantalla de fundamentos, con nombre,
+  tamaño, alto de línea, peso y uso, aplicados sobre texto real). Después 7.3 a 7.6 y el cierre
+  (grupo 8). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 
 ## Lo que ya está armado
