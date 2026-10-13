@@ -2,6 +2,7 @@ import fuente from "../../../sistema/tokens.json";
 
 import { EspacioYRadios, type MedidaDeLaEscala } from "@/components/fundamentos/espacio-y-radios";
 import { EstilosDeTexto, type EstiloDeTexto } from "@/components/fundamentos/estilos-de-texto";
+import { SeriesYEstados, type SerieDeGrafico } from "@/components/fundamentos/series-y-estados";
 import { TablaDeColores, type ColorDeLaTabla } from "@/components/fundamentos/tabla-de-colores";
 
 /** Los 42 colores de la fuente, con el valor de cada modo. */
@@ -18,6 +19,11 @@ const ESTILOS: EstiloDeTexto[] = fuente.type.groups.flatMap((grupo) => grupo.sty
 /** La escala de espacio y los cuatro radios del tema, con su medida y su uso. */
 const ESPACIOS: MedidaDeLaEscala[] = fuente.spacing.tokens;
 const RADIOS: MedidaDeLaEscala[] = fuente.radius.tokens;
+
+/** Las series de gráfico de la fuente, en su orden, sin saltear ninguna. */
+const SERIES: SerieDeGrafico[] = fuente.color.tokens
+  .filter((token) => /^chart-/.test(token.name))
+  .map((token) => ({ name: token.name, usage: token.usage }));
 
 export default function Fundamentos() {
   return (
@@ -54,6 +60,15 @@ export default function Fundamentos() {
         </p>
 
         <EspacioYRadios espacios={ESPACIOS} radios={RADIOS} />
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-section-title">Series y estados</h2>
+        <p className="text-body text-muted-foreground">
+          Los colores de gráfico, en su orden, y los estados con su palabra y su ícono.
+        </p>
+
+        <SeriesYEstados series={SERIES} />
       </section>
     </div>
   );

@@ -35,11 +35,34 @@ const COLORES: Color[] = FUENTE.color.tokens;
 const ESTILOS: Estilo[] = FUENTE.type.groups.flatMap((grupo: { styles: Estilo[] }) => grupo.styles);
 const ESPACIOS: Medida[] = FUENTE.spacing.tokens;
 const RADIOS: Medida[] = FUENTE.radius.tokens;
+/** Las series de gráfico, en el orden en que la fuente las declara. */
+const SERIES: Color[] = FUENTE.color.tokens.filter((token: Color) => /^chart-/.test(token.name));
+/** Los tres estados del sistema, tal como los nombra la fuente. */
+const ESTADOS: Color[] = FUENTE.color.tokens.filter((token: Color) =>
+  /^(success|warning|destructive)$/.test(token.name),
+);
 const MODOS = { claro: "light", oscuro: "dark" } as const;
 
 /** El valor que la fuente define para un modo. */
 function valorEn(color: Color, modo: keyof typeof MODOS): string {
   return typeof color.value === "string" ? color.value : color.value[MODOS[modo]];
+}
+
+/** Los canales de un color, tal como el navegador los pinta: la notación no importa. */
+function canales(page: Page, color: string): Promise<string> {
+  return page.evaluate((valor) => {
+    const lienzo = document.createElement("canvas");
+
+    lienzo.width = 1;
+    lienzo.height = 1;
+
+    const pincel = lienzo.getContext("2d") as CanvasRenderingContext2D;
+
+    pincel.fillStyle = valor;
+    pincel.fillRect(0, 0, 1, 1);
+
+    return [...pincel.getImageData(0, 0, 1, 1).data].join();
+  }, color);
 }
 
 /** Entra a la pantalla y fija el modo del sistema, que es el que la app sigue de entrada. */
@@ -370,5 +393,154 @@ test.describe("la escala de espacio y los radios de fundamentos", () => {
     expect(faltantes, "los radios, con su medida y su ejemplo").toEqual([]);
     expect(await page.locator("[data-radio]").count()).toBe(RADIOS.length);
     expect([...tamanos], "todos los ejemplos del mismo tamaño, para poder compararlos").toHaveLength(1);
+  });
+});
+
+test.describe("las series de gráfico y los estados de fundamentos", () => {
+  /** El color dibujado de una muestra: su fondo si pinta uno, y si no el del texto (el ícono). */
+  async function colorDibujado(page: Page, selector: string): Promise<string[]> {
+    const muestras = await page.locator(selector).all();
+    const colores: string[] = [];
+
+    for (const muestra of muestras) {
+      colores.push(
+        await muestra.evaluate((el) => {
+          const dibujado = getComputedStyle(el);
+
+          return dibujado.backgroundColor !== "rgba(0, 0, 0, 0)" ? dibujado.backgroundColor : dibujado.color;
+        }),
+      );
+    }
+
+    return colores;
+  }
+
+  test("las series se ven en el orden de la fuente, sin saltear ninguna, y con su color", async ({ page }) => {
+    // El contrato: cada serie es un `li` con `data-serie="<nombre>"` y su muestra de color,
+    // pintada con el tema, en un `[data-muestra]`.
+    await abrirEn(page, "claro");
+
+    const enPantalla = await page
+      .locator("[data-serie]")
+      .evaluateAll((filas) => filas.map((fila) => fila.getAttribute("data-serie")));
+
+    expect(enPantalla, "las series, en el orden de la fuente y sin saltear ninguna").toEqual(
+      SERIES.map((serie) => serie.name),
+    );
+
+    const faltantes: string[] = [];
+
+    for (const serie of SERIES) {
+      const fila = page.locator(`[data-serie="${serie.name}"]`);
+      const texto = (await fila.innerText()).replace(/\s+/g, " ");
+
+      if (!texto.includes(serie.name)) {
+        faltantes.push(`${serie.name}: no muestra su nombre`);
+      }
+
+      const muestra = await fila.locator("[data-muestra]").evaluate((el) => {
+        const caja = el.getBoundingClientRect();
+
+        return {
+          color: getComputedStyle(el).backgroundColor,
+          visible: caja.width > 0 && caja.height > 0,
+        };
+      });
+
+      if (!muestra.visible) {
+        faltantes.push(`${serie.name}: su muestra de color no se ve`);
+      }
+
+      if ((await canales(page, muestra.color)) !== (await canales(page, valorEn(serie, "claro")))) {
+        faltantes.push(`${serie.name}: se pinta con ${muestra.color} y en claro la fuente dice ${valorEn(serie, "claro")}`);
+      }
+    }
+
+    expect(faltantes, "cada serie con su nombre y su color").toEqual([]);
+
+    // Y manda el modo activo: se busca una serie que de verdad cambie de valor entre modos.
+    const cambia = SERIES.find((serie) => valorEn(serie, "claro") !== valorEn(serie, "oscuro"));
+
+    expect(cambia, "la fuente tiene series que cambian de valor entre modos").toBeTruthy();
+
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.reload();
+
+    const enOscuro = await page
+      .locator(`[data-serie="${cambia!.name}"] [data-muestra]`)
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+    expect(
+      await canales(page, enOscuro),
+      `"${cambia!.name}" en oscuro`,
+    ).toBe(await canales(page, valorEn(cambia!, "oscuro")));
+  });
+
+  test("cada estado se ve con una palabra y un ícono, además del color", async ({ page }) => {
+    await abrirEn(page, "claro");
+
+    const faltantes: string[] = [];
+
+    for (const estado of ESTADOS) {
+      const fila = page.locator(`[data-estado="${estado.name}"]`);
+
+      if ((await fila.count()) === 0) {
+        faltantes.push(`${estado.name}: no está en la pantalla`);
+        continue;
+      }
+
+      const palabra = (await fila.innerText()).replace(/\s+/g, " ").trim();
+
+      if (!/\p{L}/u.test(palabra)) {
+        faltantes.push(`${estado.name}: no muestra ninguna palabra (${palabra || "nada"})`);
+      }
+
+      if ((await fila.locator("svg").count()) === 0) {
+        faltantes.push(`${estado.name}: no muestra ningún ícono`);
+        continue;
+      }
+
+      // El color del sistema lo pinta el ícono (`currentColor`), así que lo que se mide es lo que
+      // se ve: el estado no se comunica sólo con el color, pero el color tiene que ser el suyo.
+      const icono = await fila
+        .locator("svg")
+        .first()
+        .evaluate((el) => {
+          const caja = el.getBoundingClientRect();
+
+          return {
+            color: getComputedStyle(el).color,
+            visible: caja.width > 0 && caja.height > 0,
+          };
+        });
+
+      if (!icono.visible) {
+        faltantes.push(`${estado.name}: su ícono no se ve`);
+      }
+
+      if ((await canales(page, icono.color)) !== (await canales(page, valorEn(estado, "claro")))) {
+        faltantes.push(
+          `${estado.name}: se pinta con ${icono.color} y en claro la fuente dice ${valorEn(estado, "claro")}`,
+        );
+      }
+    }
+
+    expect(faltantes, "los tres estados, con su palabra, su ícono y su color").toEqual([]);
+    expect(await page.locator("[data-estado]").count()).toBe(ESTADOS.length);
+  });
+
+  test("un estado no se usa como color de una serie", async ({ page }) => {
+    // La guía lo prohíbe en las dos direcciones, y acá se comprueba sobre lo dibujado.
+    await abrirEn(page, "claro");
+
+    const deSeries = await colorDibujado(page, "[data-serie] [data-muestra]");
+    const deEstados = await colorDibujado(page, "[data-estado] svg");
+
+    expect(deSeries, "las ocho series").toHaveLength(SERIES.length);
+    expect(deEstados, "los tres estados").toHaveLength(ESTADOS.length);
+    expect(
+      deSeries.filter((color) => deEstados.includes(color)),
+      "ninguna serie se pinta con el color de un estado",
+    ).toEqual([]);
   });
 });
