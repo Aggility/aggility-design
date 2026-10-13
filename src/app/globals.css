@@ -17,3 +17,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Anillo de foco del sistema (guía visual: Estados y foco).
+ *
+ * Los componentes base traen su halo (`ring-3` con el color de `ring` al 50%), que no llega a
+ * 3:1 sobre fondo claro, y no se editan (decisión 16 de `design.md`): esta regla los cubre sin
+ * tocarlos. Va a propósito **fuera** de los `@layer` de Tailwind —unlayered le gana a lo que está
+ * en una capa—, así que el anillo sólido se dibuja por encima del `outline-none` del preset. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}

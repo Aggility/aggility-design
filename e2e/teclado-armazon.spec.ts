@@ -70,6 +70,53 @@ function anilloDe(elemento: Locator): Promise<string> {
   return elemento.evaluate((el) => getComputedStyle(el).boxShadow);
 }
 
+/** Un color tal como lo pinta el navegador, venga como venga (`var()`, hexadecimal, oklch). */
+function resolverColor(page: Page, valor: string): Promise<string> {
+  return page.evaluate((entrada) => {
+    const sonda = document.createElement("span");
+
+    sonda.style.backgroundColor = entrada;
+    document.body.append(sonda);
+
+    const color = getComputedStyle(sonda).backgroundColor;
+
+    sonda.remove();
+
+    return color;
+  }, valor);
+}
+
+/** El contraste entre dos colores, como lo mide WCAG: (claro + 0,05) / (oscuro + 0,05). */
+function contraste(page: Page, uno: string, otro: string): Promise<number> {
+  return page.evaluate(([a, b]) => {
+    const lienzo = document.createElement("canvas");
+
+    lienzo.width = 1;
+    lienzo.height = 1;
+
+    const pincel = lienzo.getContext("2d") as CanvasRenderingContext2D;
+
+    const luminancia = (color: string): number => {
+      pincel.clearRect(0, 0, 1, 1);
+      pincel.fillStyle = color;
+      pincel.fillRect(0, 0, 1, 1);
+
+      const [rojo, verde, azul] = pincel.getImageData(0, 0, 1, 1).data;
+      const canal = (valor: number): number => {
+        const proporcion = valor / 255;
+
+        return proporcion <= 0.03928 ? proporcion / 12.92 : ((proporcion + 0.055) / 1.055) ** 2.4;
+      };
+
+      return 0.2126 * canal(rojo) + 0.7152 * canal(verde) + 0.0722 * canal(azul);
+    };
+
+    const [claro, oscuro] = [luminancia(a), luminancia(b)].sort((x, y) => y - x);
+
+    return (claro + 0.05) / (oscuro + 0.05);
+  }, [uno, otro]);
+}
+
 /** A 390 px las secciones viven en el cajón: hay que abrirlo para poder recorrerlas. */
 async function abrirSiHaceFalta(page: Page): Promise<void> {
   if (!esAngosto(page)) {
@@ -257,5 +304,51 @@ test.describe("la navegación del armazón con teclado", () => {
       await page.evaluate(() => document.documentElement.classList.contains("dark")),
       "y la opción elegida con el teclado queda aplicada",
     ).toBe(true);
+  });
+
+  test("el foco de teclado dibuja el anillo del sistema, y llega a 3:1 contra el fondo", async ({ page }) => {
+    // El anillo lo pone la regla global de `globals.css` (decisión 17 de `design.md`), no los
+    // componentes base. Acá se mide **dibujado**, que es lo que jsdom no puede hacer: ni resuelve
+    // el color de `ring` ni conoce el orden de capas de Tailwind, que es lo que decide quién gana.
+    /** Lo que el control con foco está dibujando ahora. */
+    const anilloDeFoco = async () => {
+      const visto = await page.evaluate(() => {
+        const estilo = getComputedStyle(document.activeElement as HTMLElement);
+
+        return {
+          color: estilo.outlineColor,
+          trazo: estilo.outlineStyle,
+          grosor: estilo.outlineWidth,
+          separacion: estilo.outlineOffset,
+        };
+      });
+
+      return { ...visto, color: await resolverColor(page, visto.color) };
+    };
+
+    for (const modo of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: modo });
+      await page.goto("/");
+
+      const delSistema = await colorDelTema(page, "--ring");
+      const boton = await llegarConTabAlBoton(page, "Modo de color");
+      await expect(boton).toBeFocused();
+
+      // El control transiciona el contorno, así que se espera a que termine de dibujarlo: recién
+      // ahí los valores son los del sistema.
+      await expect
+        .poll(anilloDeFoco, { timeout: 5_000, message: `en ${modo} el anillo tiene que quedar dibujado` })
+        .toEqual({ color: delSistema, trazo: "solid", grosor: "2px", separacion: "2px" });
+
+      // El motivo de la regla: el halo del preset (el color de `ring` al 50%) no llega a 3:1
+      // sobre fondo claro, así que el anillo sólido es el que asegura que el foco se vea.
+      const anillo = await anilloDeFoco();
+      const fondo = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+
+      expect(
+        await contraste(page, anillo.color, fondo),
+        `en ${modo} el anillo contra el fondo tiene que llegar a 3:1`,
+      ).toBeGreaterThanOrEqual(3);
+    }
   });
 });

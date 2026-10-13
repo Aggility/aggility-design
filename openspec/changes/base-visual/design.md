@@ -159,6 +159,17 @@ El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.
 - **Alternativa descartada:** ajustar a mano los componentes generados para que cumplan CA-1, la regla 2 y la guía. Va contra la decisión 11 (nunca a mano) y cada regeneración con la CLI volvería a traer las diferencias.
 - **Lo exige:** sección 5.4 y la regla del config ("Los componentes base se generan con la CLI oficial de shadcn, nunca a mano").
 
+### 17. El anillo de foco es una regla global del CSS de la app
+
+Una regla `:focus-visible` en `src/app/globals.css` dibuja el anillo de foco del sistema —sólido, de 2px en `var(--ring)`, separado 2px del control— sobre **cualquier** control, incluidos los componentes base.
+
+- **Alternativa descartada:** cambiar el anillo dentro de los componentes generados (`focus-visible:ring-3` con `ring-ring/50`). Lo prohíbe la decisión 16 y la próxima corrida de la CLI lo desharía.
+- **Alternativa descartada:** dejar sólo el halo del preset. Medido el 13/10/2026 en la app servida: el color de `ring` al 50% sobre `background` da **1,76:1** en claro y **2,24:1** en oscuro, y no llega a 3:1. El anillo sólido da **3,38:1** en claro y **5,96:1** en oscuro.
+- **Cómo funciona:** la regla vive **fuera** de los `@layer` de Tailwind —lo que no está en una capa le gana a lo que está en una—, así que se dibuja por encima del `outline-none` del preset sin editarlo. El halo del componente sigue ahí, detrás: los dos se dibujan y el sólido es el que asegura el 3:1.
+- **Medido con foco de teclado en el botón del selector de modo** (el control que la app ya tiene en todas las pantallas): `outline: rgb(98, 131, 255) solid 2px`, `outline-offset: 2px`. El contorno aparece cuando la transición del control (`transition-all`) termina, no en el primer cuadro: por eso el test del navegador espera a que se asiente.
+- **Alcance del test:** `tests/componentes/anillo-de-foco.test.tsx` comprueba el anillo en un botón y en un campo (los dos, con foco de teclado) y que la regla esté fuera de los `@layer`; `e2e/teclado-armazon.spec.ts` lo mide dibujado, con el color resuelto y el orden de capas real, sobre el control del armazón. **Ninguna pantalla de la app renderiza todavía un campo** (llegan en `pantallas-muestra`), así que el campo se verifica en jsdom y el control real, en el navegador.
+- **Lo exige:** CA-8 y la guía visual (Estados y foco). **Decisión del agente** (pedida en la sesión del 13/10/2026; Germán no la aprobó por escrito todavía): queda listada para su revisión.
+
 ## Dependencias de runtime nuevas (aprobadas por Germán el 12/10/2026, confirmadas el 13/10/2026)
 
 | Paquete | Versión exacta | Para qué | Alternativa considerada |
