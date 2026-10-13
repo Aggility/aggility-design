@@ -2,7 +2,7 @@
 
 ## 1. Proyecto y herramientas
 
-**Puerta de Germán**: aprobada el 12/10/2026 — las 9 dependencias de runtime de `design.md` (sección "Dependencias de runtime nuevas") quedan aprobadas tal como están, así que no hay que frenar al llegar acá.
+**Puerta de Germán**: aprobada el 12/10/2026 y confirmada el 13/10/2026 — las dependencias de runtime de `design.md` (sección "Dependencias de runtime nuevas") quedan aprobadas tal como están, así que no hay que frenar al llegar acá. Ojo con el número: el diseño original listaba **9** (con `clsx` y `tailwind-merge`), pero `cn` 0.4.0 los reemplazó, así que la sección tiene **8 filas** y son las 8 que instala `package.json` (`npm ls --omit=dev --depth=0`).
 
 - [x] 1.1 Crear `package.json` con las versiones exactas de `design.md` y los scripts `dev`, `build`, `start`, `lint`, `test`, `e2e`, `tema` y `capturas` (los dos últimos quedan apuntando a lo que crean 2.2 y 6.1). Verificación: `npm install` sale 0 y `npm ls --depth=0` muestra las versiones exactas fijadas, sin rangos.
 - [x] 1.2 Crear `tsconfig.json` (estricto, alias de rutas), `src/app/layout.tsx` y `src/app/page.tsx` mínimos. Verificación: `npx tsc --noEmit` y `npm run build` en verde. Si TypeScript 7.0.2 falla con Next 16.4.0, fijar 6.0.3 (verificada en `design.md`) y anotar el motivo acá.

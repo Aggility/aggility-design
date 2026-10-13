@@ -159,7 +159,7 @@ El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.
 - **Alternativa descartada:** ajustar a mano los componentes generados para que cumplan CA-1, la regla 2 y la guía. Va contra la decisión 11 (nunca a mano) y cada regeneración con la CLI volvería a traer las diferencias.
 - **Lo exige:** sección 5.4 y la regla del config ("Los componentes base se generan con la CLI oficial de shadcn, nunca a mano").
 
-## Dependencias de runtime nuevas (aprobadas por Germán el 12/10/2026)
+## Dependencias de runtime nuevas (aprobadas por Germán el 12/10/2026, confirmadas el 13/10/2026)
 
 | Paquete | Versión exacta | Para qué | Alternativa considerada |
 |---|---|---|---|
@@ -171,6 +171,8 @@ El README deja de decir que el tema se copia a mano (ahora se genera) y `AGENTS.
 | `next-themes` | 0.4.6 | Modo claro/oscuro con memoria del dispositivo (CA-3). | Implementarlo a mano (decisión 9). |
 | `class-variance-authority` | 0.7.1 | Variantes de los componentes base. Lo trae el preset. | — |
 | `cn` | 0.4.0 | Composición de clases de los componentes base (`src/lib/utils.ts` la reexporta). Es la que trae el preset `base-nova`; reemplaza a `clsx` + `tailwind-merge`. Aprobada por Germán el 12/10/2026. | `clsx` + `tailwind-merge` (2.1.1 y 3.7.0): es lo que `design.md` había supuesto, pero la utilidad la trae la CLI y no se escribe a mano (decisión 11). Quedaron sin uso y se sacaron. |
+
+**Confirmación de Germán (13/10/2026):** las dependencias de runtime y `cn` quedan confirmadas tal como están. El diseño original listaba **9** (con `clsx` 2.1.1 y `tailwind-merge` 3.7.0); `cn` 0.4.0 los reemplaza, así que la tabla tiene **8 filas**, que es exactamente lo que instala `package.json` hoy.
 
 No hay ninguna dependencia de datos ni de autenticación: los datos son de ejemplo y las pantallas de este cambio no usan datos.
 
