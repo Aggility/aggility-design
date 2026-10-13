@@ -120,7 +120,12 @@ Cubre la capacidad `componentes-base` (CA-8, sección 5.4).
   - El tooltip no existía en la app y hacía falta para poder verificarlo: se le puso al botón de menú del armazón (`BotonDeMenu`, botón de sólo ícono) y se agregó `TooltipProvider` en `src/app/layout.tsx`, que el bloque del preset pide para que los tooltips funcionen.
   - Prueba del rojo por mutación: sacando el anillo del botón (`focus-visible:ring-3 focus-visible:ring-ring/50`) el test falla nombrando el control; revertido, vuelve a verde.
   - **Defecto encontrado y arreglado** (lo pidió Germán el 13/10/2026): el menú del preset quedaba abierto después de elegir y el foco se iba a un `div`. En `src/components/tema/selector-de-modo.tsx` el menú ahora se cierra al elegir y el foco vuelve al botón; el código del preset en `src/components/ui/` no se tocó.
-- [ ] 5.4 Escribir `tests/componentes/estados.test.tsx`: los avisos dicen qué pasó y cómo seguir sin disculpas ni signos de exclamación, cada insignia de estado lleva palabra o ícono, y una acción que borra se anuncia con el estado de error. Verificación: `npm test` en verde y quitar la palabra de una insignia pone el test en rojo (se prueba y se revierte).
+- [x] 5.4 Escribir `tests/componentes/estados.test.tsx`: los avisos dicen qué pasó y cómo seguir sin disculpas ni signos de exclamación, cada insignia de estado lleva palabra o ícono, y una acción que borra se anuncia con el estado de error. Verificación: `npm test` en verde y quitar la palabra de una insignia pone el test en rojo (se prueba y se revierte).
+  - Verificado (13/10/2026): `npm test` verde (3 casos; 27 en total, en 9 archivos) y `tests/tema/sin-literales.test.ts` sigue verde: los colores de estado son clases del tema, no valores escritos.
+  - Las piezas viven en `src/components/estados/`: `estados.ts` (cada estado con su palabra, su ícono y el color del sistema: `text-success`, `text-warning` y `text-destructive`), `insignia-de-estado.tsx` (la palabra y el ícono además del color, con la palabra como nombre accesible para que el estado no dependa del color) y `avisos.ts` (qué pasó y cómo seguir, con el texto de ejemplo de la guía y voseo).
+  - Prueba del rojo por mutación: vaciando la palabra del estado "atención", el test falla nombrando `atencion: no tiene palabra`; revertido, vuelve a verde.
+  - "Una acción que borra se anuncia con el estado de error": el aviso de borrado que falla y la confirmación previa a borrar usan el estado `error` (`destructive`) y el test lo exige.
+  - La pantalla que **muestra** todo esto es la 7.4 (fundamentos): acá quedan las piezas y la regla que las cuida.
 
 ## 6. Capturas
 
