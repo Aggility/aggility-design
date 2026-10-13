@@ -1,5 +1,6 @@
 import fuente from "../../../sistema/tokens.json";
 
+import { EspacioYRadios, type MedidaDeLaEscala } from "@/components/fundamentos/espacio-y-radios";
 import { EstilosDeTexto, type EstiloDeTexto } from "@/components/fundamentos/estilos-de-texto";
 import { TablaDeColores, type ColorDeLaTabla } from "@/components/fundamentos/tabla-de-colores";
 
@@ -13,6 +14,10 @@ const COLORES: ColorDeLaTabla[] = fuente.color.tokens.map((token) => ({
 
 /** Los 10 estilos de texto de la fuente, con sus medidas y su texto de ejemplo. */
 const ESTILOS: EstiloDeTexto[] = fuente.type.groups.flatMap((grupo) => grupo.styles);
+
+/** La escala de espacio y los cuatro radios del tema, con su medida y su uso. */
+const ESPACIOS: MedidaDeLaEscala[] = fuente.spacing.tokens;
+const RADIOS: MedidaDeLaEscala[] = fuente.radius.tokens;
 
 export default function Fundamentos() {
   return (
@@ -39,6 +44,16 @@ export default function Fundamentos() {
         </p>
 
         <EstilosDeTexto estilos={ESTILOS} />
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-section-title">Espacio y radios</h2>
+        <p className="text-body text-muted-foreground">
+          La escala de espacio, medida en la separación de un ejemplo, y los cuatro radios sobre
+          cajas del mismo tamaño, para poder compararlos.
+        </p>
+
+        <EspacioYRadios espacios={ESPACIOS} radios={RADIOS} />
       </section>
     </div>
   );

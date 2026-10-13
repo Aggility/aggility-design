@@ -29,9 +29,12 @@ type Estilo = {
   sample: string;
   usage: string;
 };
+type Medida = { name: string; value: string; usage: string };
 
 const COLORES: Color[] = FUENTE.color.tokens;
 const ESTILOS: Estilo[] = FUENTE.type.groups.flatMap((grupo: { styles: Estilo[] }) => grupo.styles);
+const ESPACIOS: Medida[] = FUENTE.spacing.tokens;
+const RADIOS: Medida[] = FUENTE.radius.tokens;
 const MODOS = { claro: "light", oscuro: "dark" } as const;
 
 /** El valor que la fuente define para un modo. */
@@ -248,5 +251,124 @@ test.describe("los estilos de texto de fundamentos", () => {
     expect([...familias.keys()], "una sola familia tipográfica").toHaveLength(1);
     expect([...familias.keys()], "y es la que la app carga").toEqual([delCuerpo]);
     expect([...familias.keys()][0], "la familia es Inter").toContain("Inter");
+  });
+});
+
+test.describe("la escala de espacio y los radios de fundamentos", () => {
+  test("cada medida de la escala de espacio se ve con su nombre, su medida y un ejemplo", async ({ page }) => {
+    // El contrato de la pantalla: cada medida es un elemento con `data-espacio="<nombre>"` que
+    // muestra el nombre, el uso, la medida en un `[data-medida]` y un ejemplo visible con
+    // `data-ejemplo`, cuya separación el navegador dibuja del tamaño que la fuente dice.
+    await abrirEn(page, "claro");
+
+    const faltantes: string[] = [];
+
+    for (const espacio of ESPACIOS) {
+      const fila = page.locator(`[data-espacio="${espacio.name}"]`);
+
+      if ((await fila.count()) === 0) {
+        faltantes.push(`${espacio.name}: no está en la pantalla`);
+        continue;
+      }
+
+      const texto = (await fila.first().innerText()).replace(/\s+/g, " ");
+
+      if (!texto.includes(espacio.name)) {
+        faltantes.push(`${espacio.name}: no muestra su nombre`);
+      }
+
+      const medida = (await fila.first().locator("[data-medida]").innerText()).trim();
+
+      if (medida !== espacio.value) {
+        faltantes.push(`${espacio.name}: dice "${medida}" y la fuente dice "${espacio.value}"`);
+      }
+
+      if (espacio.usage && !texto.includes(espacio.usage.replace(/\s+/g, " "))) {
+        faltantes.push(`${espacio.name}: no muestra para qué se usa`);
+      }
+
+      // Que la medida esté escrita no alcanza: el ejemplo tiene que dibujar esa separación entre
+      // sus dos cuadros. Se mide lo dibujado, no la declaración: un ejemplo sin nada adentro
+      // también tendría el `gap` puesto.
+      const dibujado = await fila
+        .first()
+        .locator("[data-ejemplo]")
+        .evaluate((el) => {
+          const [uno, dos] = [...el.children].map((hijo) => hijo.getBoundingClientRect());
+
+          if (!uno || !dos) {
+            return { separacion: "sin ejemplo", visible: false };
+          }
+
+          return {
+            separacion: `${Math.round(dos.left - uno.right)}px`,
+            visible: uno.width > 0 && uno.height > 0 && dos.width > 0 && dos.height > 0,
+          };
+        });
+
+      if (!dibujado.visible) {
+        faltantes.push(`${espacio.name}: el ejemplo no muestra nada`);
+      }
+
+      if (dibujado.separacion !== espacio.value) {
+        faltantes.push(
+          `${espacio.name}: el ejemplo se dibuja con ${dibujado.separacion} de separación y la fuente dice ${espacio.value}`,
+        );
+      }
+    }
+
+    expect(faltantes, "la escala de espacio, con su nombre, su medida y su ejemplo").toEqual([]);
+    expect(await page.locator("[data-espacio]").count()).toBe(ESPACIOS.length);
+  });
+
+  test("cada radio se ve con su medida sobre un elemento del mismo tamaño, para compararlos", async ({ page }) => {
+    await abrirEn(page, "claro");
+
+    const faltantes: string[] = [];
+    const tamanos = new Set<string>();
+
+    for (const radio of RADIOS) {
+      const fila = page.locator(`[data-radio="${radio.name}"]`);
+
+      if ((await fila.count()) === 0) {
+        faltantes.push(`${radio.name}: no está en la pantalla`);
+        continue;
+      }
+
+      const texto = (await fila.first().innerText()).replace(/\s+/g, " ");
+
+      if (!texto.includes(radio.name)) {
+        faltantes.push(`${radio.name}: no muestra su nombre`);
+      }
+
+      const medida = (await fila.first().locator("[data-medida]").innerText()).trim();
+
+      if (medida !== radio.value) {
+        faltantes.push(`${radio.name}: dice "${medida}" y la fuente dice "${radio.value}"`);
+      }
+
+      const ejemplo = await fila
+        .first()
+        .locator("[data-ejemplo]")
+        .evaluate((el) => {
+          const dibujado = getComputedStyle(el);
+          const caja = el.getBoundingClientRect();
+
+          return {
+            radio: dibujado.borderTopLeftRadius,
+            tamanio: `${Math.round(caja.width)}×${Math.round(caja.height)}`,
+          };
+        });
+
+      if (ejemplo.radio !== radio.value) {
+        faltantes.push(`${radio.name}: el ejemplo se dibuja con ${ejemplo.radio} y la fuente dice ${radio.value}`);
+      }
+
+      tamanos.add(ejemplo.tamanio);
+    }
+
+    expect(faltantes, "los radios, con su medida y su ejemplo").toEqual([]);
+    expect(await page.locator("[data-radio]").count()).toBe(RADIOS.length);
+    expect([...tamanos], "todos los ejemplos del mismo tamaño, para poder compararlos").toHaveLength(1);
   });
 });
