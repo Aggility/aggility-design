@@ -131,10 +131,20 @@ Cubre la capacidad `componentes-base` (CA-8, sección 5.4).
 
 Cubre la capacidad `capturas` (CA-10).
 
-- [ ] 6.1 Implementar `scripts/capturas.mjs`: recorre las secciones del armazón (no una lista escrita a mano), fuerza el modo y el ancho, espera a que la tipografía esté lista y guarda una captura por pantalla, modo y ancho en `docs/capturas/` con el nombre `<pantalla>-<claro|oscuro>-<1280|390>.png`. Verificación: `npm run capturas` deja la cantidad esperada de archivos (pantallas × 2 modos × 2 anchos) y los nombres siguen el formato.
-- [ ] 6.2 Escribir `tests/capturas/capturas.test.ts` (CA-10): falla si falta una captura de una pantalla, un modo o un ancho, o si alguna quedó vacía, y la nombra. Verificación: `npm test` en verde; borrar una captura pone el test en rojo (se restaura).
-- [ ] 6.3 Comprobar que dos corridas seguidas no cambian nada cuando nada visible cambió. Verificación: `npm run capturas` dos veces y `git diff --exit-code docs/capturas` sin cambios.
-- [ ] 6.4 Commitear el juego de capturas y comprobar que se versiona. Verificación: `git status --short docs/capturas` muestra los archivos (no ignorados) y `git ls-files docs/capturas | wc -l` coincide con la cantidad esperada.
+- [x] 6.1 Implementar `scripts/capturas.mjs`: recorre las secciones del armazón (no una lista escrita a mano), fuerza el modo y el ancho, espera a que la tipografía esté lista y guarda una captura por pantalla, modo y ancho en `docs/capturas/` con el nombre `<pantalla>-<claro|oscuro>-<1280|390>.png`. Verificación: `npm run capturas` deja la cantidad esperada de archivos (pantallas × 2 modos × 2 anchos) y los nombres siguen el formato.
+  - Verificado (13/10/2026): `npm run capturas` dejó **24** archivos (6 pantallas × 2 modos × 2 anchos) con el formato pedido: `inicio`, `clientes`, `clientes-nuevo`, `estados`, `fundamentos` e `ingreso`, cada una en `claro` y `oscuro`, a `1280` y a `390`.
+  - Las pantallas **no** están escritas a mano: el script recorre los `page.tsx` de `src/app`, así que una pantalla nueva entra sola al juego. El modo se fuerza por los dos lados (la elección guardada y el modo del sistema que se emula) y se espera a `document.fonts.ready` antes de disparar la captura.
+  - Captura la app **compilada** (`next build` + `next start` en el puerto 3400, propio del script), no el servidor de desarrollo: así no hay distintivos de desarrollo en las imágenes. Antes de empezar borra el juego anterior, para que no queden capturas de pantallas que ya no están.
+  - Si una pantalla no renderiza (respuesta que no es 200 o encabezado sin título) el comando **falla nombrando la pantalla**, en lugar de dejar el juego incompleto.
+- [x] 6.2 Escribir `tests/capturas/capturas.test.ts` (CA-10): falla si falta una captura de una pantalla, un modo o un ancho, o si alguna quedó vacía, y la nombra. Verificación: `npm test` en verde; borrar una captura pone el test en rojo (se restaura).
+  - Verificado (13/10/2026): `npm test` verde (3 casos). El test lee las pantallas igual que el script (de los `page.tsx`), así que también falla si aparece una pantalla sin sus capturas.
+  - Además de la existencia, comprueba **que no haya capturas sueltas** de pantallas que ya no están, que cada PNG tenga el ancho que le toca (lo lee de su cabecera) y que no esté vacía: decodifica el PNG y cuenta colores distintos (una captura en blanco tiene uno).
+  - Prueba del rojo por mutación, con las dos formas: borrando `estados-oscuro-390.png` el test falla nombrando ese archivo, y reemplazándolo por un PNG en blanco del mismo tamaño falla con `parece vacía (sólo 1 colores)`. Restaurada, vuelve a verde.
+- [x] 6.3 Comprobar que dos corridas seguidas no cambian nada cuando nada visible cambió. Verificación: `npm run capturas` dos veces y `git diff --exit-code docs/capturas` sin cambios.
+  - Verificado (13/10/2026): segunda corrida de `npm run capturas` y `git diff --exit-code docs/capturas` sin cambios (termina en 0), y `git status --short docs/capturas` tampoco muestra archivos nuevos ni borrados.
+  - Ojo con el orden: esta comprobación necesita las capturas **ya versionadas** (si no, `git diff` no las mira), así que se corrió después de la 6.4.
+- [x] 6.4 Commitear el juego de capturas y comprobar que se versiona. Verificación: `git status --short docs/capturas` muestra los archivos (no ignorados) y `git ls-files docs/capturas | wc -l` coincide con la cantidad esperada.
+  - Verificado (13/10/2026): `git ls-files docs/capturas | wc -l` da **24** (lo esperado) y `git status --short docs/capturas` no muestra nada: están versionadas, no ignoradas. El `.gitignore` lo dice a propósito ("docs/capturas/ SÍ se versiona: son la prueba visual que revisa Germán").
 
 ## 7. Pantalla de fundamentos
 

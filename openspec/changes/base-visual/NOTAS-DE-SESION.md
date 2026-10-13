@@ -6,14 +6,14 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 28 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
-  el **grupo 3 completo** (el armazón), el **grupo 4 completo** (el modo claro y oscuro) y el
-  **grupo 5 completo** (los 14 componentes base, su inventario, su teclado y los estados).
-- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (27 tests, 9 archivos),
+- 32 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
+  el **grupo 3 completo** (el armazón), el **grupo 4 completo** (el modo claro y oscuro), el
+  **grupo 5 completo** (los 14 componentes base, su inventario, su teclado y los estados) y el
+  **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas).
+- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (30 tests, 10 archivos),
   `npx playwright test` (34 pasan) y `npm run build`.
-- La próxima tarea es la **6.1** (el script de capturas: recorre las secciones del armazón —no
-  una lista escrita a mano—, fuerza el modo y el ancho, espera a que la tipografía esté lista y
-  guarda una captura por pantalla, modo y ancho en `docs/capturas/`). Se retoma con:
+- La próxima tarea es la **7.1** (la pantalla de fundamentos: primero el test en rojo y después
+  la tabla de colores con nombre, valor y uso, que sigue al modo activo). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 
 ## Lo que ya está armado
