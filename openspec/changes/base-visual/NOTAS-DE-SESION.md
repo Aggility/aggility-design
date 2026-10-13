@@ -6,17 +6,18 @@
 
 ## Dónde quedó el trabajo (13/10/2026)
 
-- 35 de 43 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
-  el **grupo 3 completo** (el armazón), el **grupo 4 completo** (el modo claro y oscuro), el
-  **grupo 5 completo** (los 14 componentes base, su inventario, su teclado y los estados), el
-  **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas) y, del
-  grupo 7, la **7.1** (la tabla de colores), la **7.1b** (el anillo de foco como regla global) y
-  la **7.2** (los estilos de texto aplicados).
-- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (33 tests, 11 archivos),
-  `npx playwright test` (48 pasan, 16 saltados) y `npm run build` (lo corre `npm run capturas`).
-- La próxima tarea es la **7.3** (la escala de espacio y los radios, con nombre, medida y un
-  ejemplo visible). Después 7.4 a 7.6 y el cierre (grupo 8). Se retoma con:
-  `openspec instructions apply --change "base-visual" --json`
+- **42 de 43 tareas hechas.** Los grupos 1 a 6 completos, el **grupo 7 completo** (las cinco
+  secciones de la pantalla de fundamentos, más la 7.1b del anillo de foco) y el cierre **8.2, 8.3 y
+  8.4** (la verificación, la trazabilidad y la corrida completa).
+- **Falta la 8.1**: completar en `AGENTS.md` la sección «Estructura y comandos del proyecto». Está
+  **bloqueada**: `AGENTS.md` es un archivo protegido y el intento de escritura quedó esperando una
+  aprobación que no llegó (el sistema lo rechazó y pidió no reintentarlo por otra vía). El texto a
+  pegar está escrito en la nota de la tarea, en `tasks.md`. **Necesita el OK de Germán.**
+- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (39 tests, 12 archivos),
+  `npx playwright test` (64 pasan, 16 saltados) y `openspec validate "base-visual" --strict`.
+- Lo que sigue, entonces, no es una tarea sino la **puerta de Germán**: revisar el diff y las
+  capturas (`docs/capturas/`) y, con su OK, archivar el cambio con `/openspec-archive-change`
+  (y borrar este archivo antes).
 
 ## Lo de la sesión del 13/10/2026
 
@@ -51,6 +52,24 @@
   app, pero una regla inyectada se computa): por eso el anillo de foco se puede probar en Vitest
   con los componentes reales, leyendo la regla de `globals.css`. Lo que jsdom no hace es resolver
   `var()` ni ordenar los `@layer`, y eso sigue siendo del navegador.
+- **Los colores no se comparan como texto.** El navegador computa el mismo color en notaciones
+  distintas según de dónde venga (`lab(48.4493 …)` para el ícono de un estado, `oklch(…)` en la
+  fuente), así que comparar cadenas da falsos rojos. Se comparan los píxeles: los dos colores se
+  pintan en un `canvas` de 1×1 y se comparan los canales.
+- **`next/image` carga en diferido.** En una pantalla larga, los logos del final no estaban
+  cargados ni al medirlos ni —lo que importa— al sacar las capturas de página entera: se habrían
+  visto marcos vacíos. En la pantalla de fundamentos van con `loading="eager"` y el test espera a
+  que las imágenes terminen de cargar (`complete`) antes de medir.
+- **`next/image` no anda en Vitest**: el import estático de una imagen queda como una URL suelta,
+  sin ancho ni alto, y el componente protesta. En los tests de Vitest se reemplaza por una imagen
+  común con `vi.mock("next/image", …)`.
+- **Un `next dev` bloquea a otro en la misma carpeta, sin importar el puerto** ("Another next dev
+  server is already running"): con el servidor de Germán en el 3000, Playwright no puede levantar
+  el suyo en el 3202. No se toca su servidor: los tests corrieron contra la app compilada en el
+  3203 con una config temporal. La alternativa es esperar a que no haya ningún `next dev`.
+- **`AGENTS.md` está protegido.** Escribirlo requiere una aprobación explícita del usuario; si el
+  pedido queda sin respuesta, el sistema rechaza la escritura y no hay que reintentarla por otra
+  vía (ni con `terminal`). Primero se anota el bloqueo en la tarea y después se pide.
 
 ## Lo que ya está armado
 
