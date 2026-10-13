@@ -1,6 +1,6 @@
 # Spec — Sistema de diseño Aggility
 
-**Estado:** v1.0, para aprobar · **Fecha:** 12/10/2026 · **Responsable:** Germán
+**Estado:** v1.0, aprobada · **Fecha:** 13/10/2026 · **Responsable:** Germán
 
 Lo marcado como *(a confirmar)* es una propuesta que todavía no fue validada.
 
@@ -77,7 +77,7 @@ Los datos son de ejemplo, ficticios, sin nombres de clientes reales, y la pantal
 3. Para cambiar un valor se cambia `tokens.json` y se regenera el tema. No se edita `aggility-theme.css` a mano.
 4. No se copia código de Horace ni de la app de gestión. Se pueden mirar como referencia visual.
 5. Textos en español de Argentina con voseo, números con punto de miles y coma decimal, siempre con su período.
-6. Cada fuente de datos tiene un color fijo en toda la app: Meta `chart-1`, Google Ads `chart-2`, Search Console `chart-3`, GA4 `chart-4`. *(a confirmar)*
+6. Cada fuente de datos tiene un color fijo en toda la app: Meta `chart-1`, Google Ads `chart-2`, Search Console `chart-3`, GA4 `chart-4`.
 
 ## 8. Criterios de aceptación
 
@@ -95,4 +95,3 @@ Los datos son de ejemplo, ficticios, sin nombres de clientes reales, y la pantal
 ## 9. Pendientes
 
 1. Si se publica en Vercel para verla desde cualquier lado. *(a confirmar)*
-2. La asignación de colores por fuente de la regla 6.
