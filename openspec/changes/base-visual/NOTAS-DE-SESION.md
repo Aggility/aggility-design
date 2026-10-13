@@ -6,23 +6,24 @@
 
 ## Dónde quedó el trabajo (12/10/2026)
 
-- 24 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
-  el **grupo 3 completo** (armazón: componentes base con la CLI, barra lateral, encabezado,
-  cajón a 390 px y teclado) y el **grupo 4 completo** (modo claro y oscuro: proveedor,
-  selector en el encabezado y primer pintado sin destello).
-- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (16 tests),
-  `npx playwright test` (6 pasan, 4 saltados a propósito en el ancho angosto) y `npm run build`.
-- La próxima tarea es la **5.1** (generar con la CLI los componentes base que faltan: los
-  14 de la sección 5.4, de los que ya están botón, campo, separador, esqueleto, tooltip,
-  cajón, barra lateral, avatar y menú desplegable). Se retoma con:
+- 27 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
+  el **grupo 3 completo** (el armazón), el **grupo 4 completo** (el modo claro y oscuro) y
+  las **5.1 a 5.3** (los 14 componentes base de la sección 5.4 con la CLI, su inventario y su
+  teclado; falta la 5.4).
+- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (24 tests, 8 archivos),
+  `npx playwright test` (34 pasan) y `npm run build`.
+- La próxima tarea es la **5.4** (los estados: los avisos dicen qué pasó y cómo seguir sin
+  disculpas ni signos de exclamación, cada insignia de estado lleva palabra o ícono y una
+  acción que borra se anuncia con el estado de error). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 
 ## Lo que ya está armado
 
 - **El tema**: `npm run tema` escribe `sistema/aggility-theme.css` y la copia de la app;
   `src/app/globals.css` la importa y la app carga Inter con `next/font`.
-- **Los componentes base**: los 9 que generó la CLI (botón, campo, separador, esqueleto,
-  tooltip, cajón, barra lateral, avatar, menú desplegable) en `src/components/ui/`.
+- **Los componentes base**: los 16 que generó la CLI en `src/components/ui/`: los 14 de la
+  sección 5.4 (botón, campo, selector, casilla, diálogo, cajón, menú desplegable, tabla,
+  insignia, tarjeta, separador, tooltip, avatar y aviso) más el esqueleto y la barra lateral.
 - **El armazón**: `src/components/estructura/secciones.ts` (grupos, secciones y el usuario de
   ejemplo) y `barra-lateral.tsx`. El layout arma `SidebarProvider` + la barra + `SidebarInset`
   (que es el `main`: las páginas no llevan otro).
@@ -59,10 +60,10 @@ Los tests del tema:
 - **El test de CA-1 excluye los destinos del generador** (los toma de `DESTINOS`). El único
   archivo de `src/` con colores literales por diseño es la copia del tema, y sus valores los
   guarda el test de coincidencia.
-- **CA-1 cubre valores literales, no nombres de clases.** Hallazgo para el grupo 5: las clases
-  de la escala por defecto de Tailwind (`text-sm`, `text-3xl` —hoy en `src/app/page.tsx`—) no
-  salen de la fuente, y la CLI de shadcn las usa en los componentes generados. Hay que decidir
-  en la 5.1 si los componentes base se quedan con esa escala o se mapea a los estilos del tema.
+- **CA-1 cubre valores literales, no nombres de clases.** Las clases de la escala por defecto
+  de Tailwind (`text-sm`, `text-3xl` —hoy en `src/app/page.tsx`—) no salen de la fuente. Quedó
+  resuelto el 12/10/2026 con la decisión 16: los componentes base se quedan con la escala que
+  trae la herramienta y `sistema/guia.md` se ajustó a eso.
   Ojo: los radios de la herramienta (`rounded-md`, `rounded-lg`) sí salen del tema, porque
   Tailwind v4 los toma de `--radius-*`.
 - **TypeScript quedó en 6.0.3**, no en 7.0.2: `typescript-eslint`, que trae `eslint-config-next`,
@@ -108,3 +109,22 @@ tests corrieron contra la pantalla `/ingreso` de `aggility-gestion`.
   ejemplo para agregar otro componente— hay que restaurar otra vez `globals.css` y
   `layout.tsx` y correr `npm test` (el test de coincidencia de CA-2 avisa si el tema quedó
   pisado).
+
+## Trampas nuevas (13/10/2026)
+
+- **El menú del preset no se cierra al elegir** (ni con Enter ni con clic) y el foco se va a
+  un `div`. Se arregló en `src/components/tema/selector-de-modo.tsx` (menú controlado: se
+  cierra y devuelve el foco al botón). El código de `src/components/ui/` no se toca.
+- **Los tooltips del preset necesitan `TooltipProvider`** en el árbol: sin él no abren. Está
+  en `src/app/layout.tsx`.
+- **Base UI no le pone `role="tooltip"`** al globo: en los tests se lo busca por
+  `[data-slot="tooltip-content"]`.
+- **jsdom no sirve para el menú ni para el tooltip** (no mueve el foco adentro del popup y
+  los disparadores miden cero): esas dos cosas se verifican en `e2e/teclado-armazon.spec.ts`.
+- **Testing Library no limpia sola** sin los globales de Vitest: hay que llamar a `cleanup`
+  en un `afterEach`, o los renders se acumulan y los `getByRole` encuentran elementos de más.
+- Al commitear, **no usar `git add -A`**: Germán tiene cambios propios sin commitear en
+  `docs/referencia/spec-producto.md`. Los archivos se agregan por nombre.
+- Si Playwright no arranca por "Another next dev server is already running", hay que matar
+  **sólo** el `next-server` que quedó colgado en el puerto 3299 (`lsof -nP -iTCP:3299`), no
+  todos los de la máquina.

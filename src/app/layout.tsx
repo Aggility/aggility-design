@@ -6,6 +6,7 @@ import { BarraLateral } from "@/components/estructura/barra-lateral";
 import { Encabezado } from "@/components/estructura/encabezado";
 import { ProveedorDeModo } from "@/components/tema/proveedor-de-modo";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
@@ -30,14 +31,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="es-AR" className={inter.variable} suppressHydrationWarning>
       <body>
         <ProveedorDeModo>
-          <SidebarProvider>
-            <BarraLateral />
-            {/* `SidebarInset` es el `main` de la pantalla: las páginas no llevan otro. */}
-            <SidebarInset>
-              <Encabezado />
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
+          {/* `TooltipProvider` agrupa los tooltips y aplica el retardo compartido. */}
+          <TooltipProvider>
+            <SidebarProvider>
+              <BarraLateral />
+              {/* `SidebarInset` es el `main` de la pantalla: las páginas no llevan otro. */}
+              <SidebarInset>
+                <Encabezado />
+                {children}
+              </SidebarInset>
+            </SidebarProvider>
+          </TooltipProvider>
         </ProveedorDeModo>
       </body>
     </html>

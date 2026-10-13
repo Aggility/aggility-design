@@ -8,6 +8,11 @@ import { Fragment } from "react";
 import { GRUPOS, USUARIO, seccionDeLaRuta, type GrupoDeSecciones } from "@/components/estructura/secciones";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -53,9 +58,20 @@ function inicialesDe(nombre: string): string {
 /**
  * El botón de menú de las pantallas angostas: abre y cierra el cajón. Vive acá porque es
  * parte del comportamiento angosto de la barra, y el encabezado lo pone donde va.
+ *
+ * Lleva tooltip porque es un botón de sólo ícono y su nombre accesible no se ve.
  */
 export function BotonDeMenu({ className }: { className?: string }) {
-  return <SidebarTrigger aria-label="Menú de secciones" className={cn("md:hidden", className)} />;
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        aria-label="Menú de secciones"
+        className={cn("md:hidden", className)}
+        render={<SidebarTrigger />}
+      />
+      <TooltipContent>Secciones</TooltipContent>
+    </Tooltip>
+  );
 }
 
 /**

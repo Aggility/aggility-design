@@ -2,6 +2,7 @@
 
 import { Monitor, Moon, Sun, SunMoon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,14 +30,30 @@ const MODOS = [
  */
 export function SelectorDeModo() {
   const { theme, setTheme } = useTheme();
+  const [abierto, setAbierto] = useState(false);
+  const boton = useRef<HTMLButtonElement>(null);
+
+  /**
+   * El menú del preset queda abierto después de elegir y el foco se va a un `div`, así que acá
+   * se cierra el menú y se devuelve el foco al botón. Lo pidió Germán el 13/10/2026.
+   */
+  function elegir(valor: string) {
+    setTheme(valor);
+    setAbierto(false);
+    boton.current?.focus();
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger aria-label="Modo de color" render={<Button variant="ghost" size="icon-sm" />}>
+    <DropdownMenu open={abierto} onOpenChange={setAbierto}>
+      <DropdownMenuTrigger
+        ref={boton}
+        aria-label="Modo de color"
+        render={<Button variant="ghost" size="icon-sm" />}
+      >
         <SunMoon aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={setTheme}>
+        <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={elegir}>
           {MODOS.map(({ valor, etiqueta, Icono }) => (
             <DropdownMenuRadioItem key={valor} value={valor}>
               <Icono aria-hidden="true" />
