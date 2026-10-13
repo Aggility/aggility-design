@@ -4,19 +4,53 @@
 > releer el chat. **Borrar antes de archivar `base-visual`:**
 > `rm openspec/changes/base-visual/NOTAS-DE-SESION.md`
 
-## Dónde quedó el trabajo (12/10/2026)
+## Dónde quedó el trabajo (13/10/2026)
 
-- 33 de 42 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
+- 35 de 43 tareas hechas: el grupo 1 completo, el **grupo 2 completo** (el tema generado),
   el **grupo 3 completo** (el armazón), el **grupo 4 completo** (el modo claro y oscuro), el
   **grupo 5 completo** (los 14 componentes base, su inventario, su teclado y los estados), el
-  **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas) y la
-  **7.1** (la tabla de colores de fundamentos).
-- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (30 tests, 10 archivos),
-  `npx playwright test` (34 pasan) y `npm run build`.
-- La próxima tarea es la **7.2** (los estilos de texto en la pantalla de fundamentos, con nombre,
-  tamaño, alto de línea, peso y uso, aplicados sobre texto real). Después 7.3 a 7.6 y el cierre
-  (grupo 8). Se retoma con:
+  **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas) y, del
+  grupo 7, la **7.1** (la tabla de colores), la **7.1b** (el anillo de foco como regla global) y
+  la **7.2** (los estilos de texto aplicados).
+- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (33 tests, 11 archivos),
+  `npx playwright test` (48 pasan, 16 saltados) y `npm run build` (lo corre `npm run capturas`).
+- La próxima tarea es la **7.3** (la escala de espacio y los radios, con nombre, medida y un
+  ejemplo visible). Después 7.4 a 7.6 y el cierre (grupo 8). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
+
+## Lo de la sesión del 13/10/2026
+
+- **Tres commits que pidió Germán**, cada uno nombrando su archivo: la spec aprobada
+  (`docs/referencia/spec-producto.md`), el skill de OpenSpec restaurado (las lecciones viven en
+  `openspec-apply-lecciones`, no en el archivo que OpenSpec reescribe) y la guía con la regla
+  global de foco y la escala de texto de shadcn.
+- **Dependencias**: Germán confirmó el 13/10/2026 las dependencias de runtime y `cn`. Ojo con el
+  número: el diseño original listaba **9** (con `clsx` y `tailwind-merge`) y la tabla tiene **8
+  filas** porque `cn` 0.4.0 los reemplazó; la puerta de `tasks.md` ya dice 8.
+- **7.1b — el anillo de foco** (`src/app/globals.css`): regla `:focus-visible` con `outline: 2px
+  solid var(--ring)` y `outline-offset: 2px`, **fuera** de los `@layer` (así le gana al
+  `outline-none` del preset sin tocar los componentes). Decisión 17 de `design.md`. Medido en la
+  app: 3,38:1 en claro y 5,96:1 en oscuro (el halo del preset, 1,76:1 y 2,24:1). El halo del
+  componente sigue dibujándose detrás: es el costo de no editar los componentes.
+- **7.2 — los estilos de texto** (`src/components/fundamentos/estilos-de-texto.tsx`): cada estilo
+  con su nombre, sus medidas, su uso y el texto de ejemplo de la fuente aplicado. La pantalla de
+  fundamentos ahora tiene dos secciones con `section-title` («Colores» y «Estilos de texto»).
+
+## Trampas nuevas de la sesión del 13/10/2026
+
+- **Una clase compuesta al vuelo no existe en el CSS.** Tailwind arma las utilidades que ve
+  escritas en el código, así que `text-${nombre}` no llega al CSS compilado y el estilo no se
+  aplica (y el build queda verde). Las clases de los 10 estilos de texto van escritas enteras en
+  un mapa dentro del componente; el test nombra al estilo que se quedó sin su clase. Vale para
+  cualquier clase que salga de un token.
+- **Los controles de shadcn traen `transition-all`.** El contorno de foco tarda unos cuadros en
+  dibujarse: la primera medición devolvió `outline-offset: 1px` y el anillo del navegador (3px con
+  el color de `ring` al 50%). Los tests que miden lo dibujado tienen que esperar a que se asiente
+  (`expect.poll` contra los valores computados).
+- **jsdom sí aplica las reglas de un `<style>` que esté en el documento** (no carga la hoja de la
+  app, pero una regla inyectada se computa): por eso el anillo de foco se puede probar en Vitest
+  con los componentes reales, leyendo la regla de `globals.css`. Lo que jsdom no hace es resolver
+  `var()` ni ordenar los `@layer`, y eso sigue siendo del navegador.
 
 ## Lo que ya está armado
 
@@ -30,7 +64,8 @@
   (que es el `main`: las páginas no llevan otro).
 - **Las rutas**: `/` (Inicio), `/fundamentos`, `/clientes`, `/clientes/nuevo`, `/ingreso` y
   `/estados`. Las cinco últimas son pantallas con un párrafo: cada una llega en su cambio
-  (Fundamentos en el grupo 7, las de muestra en `pantallas-muestra`).
+  (Fundamentos en el grupo 7, las de muestra en `pantallas-muestra`). La de fundamentos ya tiene
+  dos secciones: la tabla de colores (7.1) y los estilos de texto (7.2).
 
 ## El generador del tema (grupo 2, ya hecho)
 
