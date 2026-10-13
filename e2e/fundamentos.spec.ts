@@ -4,11 +4,15 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * La pantalla de fundamentos: los colores con su nombre, su valor y su uso (sección 5.2).
+ * La pantalla de fundamentos: los colores con su nombre, su valor y su uso, y los estilos de
+ * texto aplicados (sección 5.2).
  *
  * Lo que se espera no está escrito acá: sale de `sistema/tokens.json`, la fuente de valores.
  * El contrato de la pantalla es que cada color es un elemento con `data-color="<nombre>"` que
- * muestra el nombre, el uso y —en un elemento con `data-valor`— el valor del modo activo.
+ * muestra el nombre, el uso y —en un elemento con `data-valor`— el valor del modo activo, y que
+ * cada estilo de texto es un elemento con `data-estilo="<nombre>"` que muestra el nombre, sus
+ * medidas en elementos con `data-medida` (tamaño, alto de línea y peso), el uso, y el texto de
+ * ejemplo de la fuente aplicado en un elemento con `data-muestra`.
  */
 
 // Playwright corre desde la raíz del proyecto (y transpila a CommonJS, así que `import.meta` no
@@ -17,8 +21,17 @@ const RAIZ = process.cwd();
 const FUENTE = JSON.parse(readFileSync(path.join(RAIZ, "sistema", "tokens.json"), "utf8"));
 
 type Color = { name: string; value: string | { light: string; dark: string }; usage: string };
+type Estilo = {
+  name: string;
+  fontSize: string;
+  lineHeight: string;
+  fontWeight: number;
+  sample: string;
+  usage: string;
+};
 
 const COLORES: Color[] = FUENTE.color.tokens;
+const ESTILOS: Estilo[] = FUENTE.type.groups.flatMap((grupo: { styles: Estilo[] }) => grupo.styles);
 const MODOS = { claro: "light", oscuro: "dark" } as const;
 
 /** El valor que la fuente define para un modo. */
@@ -126,5 +139,114 @@ test.describe("la tabla de colores de fundamentos", () => {
       });
 
     expect(fallas, "los colores de marca valen lo mismo en los dos modos").toEqual([]);
+  });
+});
+
+test.describe("los estilos de texto de fundamentos", () => {
+  test("cada estilo de la fuente se ve aplicado, con su nombre, sus medidas y su uso", async ({ page }) => {
+    await abrirEn(page, "claro");
+
+    const faltantes: string[] = [];
+
+    for (const estilo of ESTILOS) {
+      const fila = page.locator(`[data-estilo="${estilo.name}"]`);
+
+      if ((await fila.count()) === 0) {
+        faltantes.push(`${estilo.name}: no está en la pantalla`);
+        continue;
+      }
+
+      const texto = (await fila.first().innerText()).replace(/\s+/g, " ");
+
+      if (!texto.includes(estilo.name)) {
+        faltantes.push(`${estilo.name}: no muestra su nombre`);
+      }
+
+      const muestra = (await fila.first().locator("[data-muestra]").innerText()).trim();
+
+      if (muestra !== estilo.sample) {
+        faltantes.push(`${estilo.name}: el texto de ejemplo dice "${muestra}" y la fuente dice "${estilo.sample}"`);
+      }
+
+      const medidas: Record<string, string> = {
+        tamano: estilo.fontSize,
+        linea: estilo.lineHeight,
+        peso: String(estilo.fontWeight),
+      };
+
+      for (const [cual, esperada] of Object.entries(medidas)) {
+        const vista = (await fila.first().locator(`[data-medida="${cual}"]`).innerText()).trim();
+
+        if (vista !== esperada) {
+          faltantes.push(`${estilo.name}: ${cual} dice "${vista}" y la fuente dice "${esperada}"`);
+        }
+      }
+
+      if (estilo.usage && !texto.includes(estilo.usage.replace(/\s+/g, " "))) {
+        faltantes.push(`${estilo.name}: no muestra para qué se usa`);
+      }
+    }
+
+    expect(faltantes, "los estilos de texto de la fuente, aplicados y con sus medidas al lado").toEqual([]);
+    expect(await page.locator("[data-estilo]").count()).toBe(ESTILOS.length);
+  });
+
+  test("cada estilo se dibuja con el tamaño, el alto de línea y el peso de la fuente", async ({ page }) => {
+    // Que la medida esté escrita al lado no alcanza: el estilo tiene que estar **aplicado**. Acá
+    // se mide lo que el navegador dibuja sobre el texto de ejemplo.
+    await abrirEn(page, "claro");
+
+    const fallas: string[] = [];
+
+    for (const estilo of ESTILOS) {
+      const dibujado = await page.locator(`[data-estilo="${estilo.name}"] [data-muestra]`).evaluate((el) => {
+        const computado = getComputedStyle(el);
+
+        return { tamano: computado.fontSize, linea: computado.lineHeight, peso: computado.fontWeight };
+      });
+
+      if (dibujado.tamano !== estilo.fontSize) {
+        fallas.push(`${estilo.name}: se dibuja en ${dibujado.tamano} y la fuente dice ${estilo.fontSize}`);
+      }
+
+      if (dibujado.linea !== estilo.lineHeight) {
+        fallas.push(`${estilo.name}: con alto de línea ${dibujado.linea} y la fuente dice ${estilo.lineHeight}`);
+      }
+
+      if (dibujado.peso !== String(estilo.fontWeight)) {
+        fallas.push(`${estilo.name}: con peso ${dibujado.peso} y la fuente dice ${estilo.fontWeight}`);
+      }
+    }
+
+    expect(fallas, "cada estilo aplicado con las medidas de la fuente").toEqual([]);
+  });
+
+  test("todos los estilos usan la misma familia y ningún peso fuera de los de la fuente", async ({ page }) => {
+    await abrirEn(page, "claro");
+
+    const familias = new Map<string, string>();
+    const pesosDeLaFuente = ESTILOS.map((estilo) => String(estilo.fontWeight));
+
+    for (const estilo of ESTILOS) {
+      const computado = await page.locator(`[data-estilo="${estilo.name}"] [data-muestra]`).evaluate((el) => {
+        const dibujado = getComputedStyle(el);
+
+        return { familia: dibujado.fontFamily, peso: dibujado.fontWeight };
+      });
+
+      familias.set(computado.familia, familias.get(computado.familia) ?? estilo.name);
+
+      expect(pesosDeLaFuente, `"${estilo.name}" se dibuja con un peso que la fuente define`).toContain(
+        computado.peso,
+      );
+    }
+
+    // Una sola familia en toda la pantalla, y la misma que carga la app: si alguna cayera en una
+    // de reserva, acá aparecería una segunda familia.
+    const delCuerpo = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+
+    expect([...familias.keys()], "una sola familia tipográfica").toHaveLength(1);
+    expect([...familias.keys()], "y es la que la app carga").toEqual([delCuerpo]);
+    expect([...familias.keys()][0], "la familia es Inter").toContain("Inter");
   });
 });
