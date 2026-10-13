@@ -12,8 +12,10 @@
   **grupo 6 completo** (el script de capturas, su test y las 24 capturas versionadas).
 - En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (30 tests, 10 archivos),
   `npx playwright test` (34 pasan) y `npm run build`.
-- La próxima tarea es la **7.1** (la pantalla de fundamentos: primero el test en rojo y después
-  la tabla de colores con nombre, valor y uso, que sigue al modo activo). Se retoma con:
+- La próxima tarea es la **7.1**, que quedó a mitad: el test (`e2e/fundamentos.spec.ts`) está
+  escrito y **en rojo** por el motivo correcto, falta la tabla de colores
+  (`src/components/fundamentos/tabla-de-colores.tsx` + cablearla en la página). Después siguen
+  7.2 a 7.6 y el cierre (grupo 8). Se retoma con:
   `openspec instructions apply --change "base-visual" --json`
 
 ## Lo que ya está armado
