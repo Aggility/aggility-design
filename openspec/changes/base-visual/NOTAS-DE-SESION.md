@@ -6,18 +6,19 @@
 
 ## Dónde quedó el trabajo (13/10/2026)
 
-- **42 de 43 tareas hechas.** Los grupos 1 a 6 completos, el **grupo 7 completo** (las cinco
-  secciones de la pantalla de fundamentos, más la 7.1b del anillo de foco) y el cierre **8.2, 8.3 y
-  8.4** (la verificación, la trazabilidad y la corrida completa).
-- **Falta la 8.1**: completar en `AGENTS.md` la sección «Estructura y comandos del proyecto». Está
-  **bloqueada**: `AGENTS.md` es un archivo protegido y el intento de escritura quedó esperando una
-  aprobación que no llegó (el sistema lo rechazó y pidió no reintentarlo por otra vía). El texto a
-  pegar está escrito en la nota de la tarea, en `tasks.md`. **Necesita el OK de Germán.**
-- En verde, los cinco: `npx tsc --noEmit`, `npm run lint`, `npm test` (39 tests, 12 archivos),
-  `npx playwright test` (64 pasan, 16 saltados) y `openspec validate "base-visual" --strict`.
-- Lo que sigue, entonces, no es una tarea sino la **puerta de Germán**: revisar el diff y las
-  capturas (`docs/capturas/`) y, con su OK, archivar el cambio con `/openspec-archive-change`
-  (y borrar este archivo antes).
+- **43 de 43 tareas hechas.** Los grupos 1 a 6 completos, el **grupo 7 completo** (las cinco
+  secciones de la pantalla de fundamentos, más la 7.1b del anillo de foco) y el **cierre completo**
+  (la 8.1 con la estructura y los comandos en `AGENTS.md`, la verificación, la trazabilidad y la
+  corrida completa).
+- En verde: `npx tsc --noEmit`, `npm run lint`, `npm test` (39 tests, 12 archivos), `npx playwright
+  test` (64 pasan, 16 saltados) y `openspec validate "base-visual" --strict`. La última corrida
+  completa fue antes del cambio de `AGENTS.md`, que es documentación y no toca código.
+- El remoto `origin` (`git@github.com:Aggility/aggility-design.git`) ya está, y la rama es `main`
+  con seguimiento de `origin/main`.
+- Lo que sigue no es una tarea: es la **puerta de Germán**. Revisar el diff y las capturas
+  (`docs/capturas/`, sobre todo las 4 de fundamentos) y, con su OK, archivar el cambio con
+  `/openspec-archive-change` — antes, borrar este archivo (`rm
+  openspec/changes/base-visual/NOTAS-DE-SESION.md`).
 
 ## Lo de la sesión del 13/10/2026
 
@@ -67,9 +68,11 @@
   server is already running"): con el servidor de Germán en el 3000, Playwright no puede levantar
   el suyo en el 3202. No se toca su servidor: los tests corrieron contra la app compilada en el
   3203 con una config temporal. La alternativa es esperar a que no haya ningún `next dev`.
-- **`AGENTS.md` está protegido.** Escribirlo requiere una aprobación explícita del usuario; si el
-  pedido queda sin respuesta, el sistema rechaza la escritura y no hay que reintentarla por otra
-  vía (ni con `terminal`). Primero se anota el bloqueo en la tarea y después se pide.
+- **`AGENTS.md` está protegido.** Escribirlo requiere aprobar el **aviso de permiso** que aparece en
+  la interfaz: el OK en el chat no alcanza, y si el aviso se vence la escritura se rechaza (y no hay
+  que reintentarla por otra vía, ni con `terminal`). Pasó dos veces y entró al tercer intento, con el
+  aviso aprobado. Cuando una tarea toque un archivo así: avisar que va a aparecer el aviso y pedir
+  que se apruebe en el momento.
 
 ## Lo que ya está armado
 

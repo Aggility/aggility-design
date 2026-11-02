@@ -86,11 +86,13 @@ Las **4 de fundamentos** son las que cambiaron en las últimas tareas (la pantal
 secciones: colores, estilos de texto, espacio y radios, series y estados, y logos). Las otras 20
 salieron idénticas en la última corrida del comando.
 
-## La sección que falta en `AGENTS.md` (tarea 8.1, bloqueada)
+## `AGENTS.md`: la sección que se escribió (tarea 8.1)
 
-`AGENTS.md` es un archivo protegido y la escritura necesita una aprobación que no llegó (dos veces,
-la segunda con el OK de Germán en el chat). El texto queda acá, listo para pegar: reemplaza la línea
-«Se completan en la primera tarea del cambio `base-visual`, con lo que exista de verdad.»
+La sección «Estructura y comandos del proyecto» está en `AGENTS.md` desde el 13/10/2026. Costó tres
+intentos: el archivo es protegido y el **aviso de permiso** se venció sin respuesta dos veces (el OK
+en el chat no alcanza); al tercero, aprobado el aviso, entró. Los 8 comandos que nombra existen en
+`package.json` y no quedó ningún script del `package.json` sin mencionar. Queda acá como registro de
+lo que se aprobó:
 
 ```markdown
 ## Estructura y comandos del proyecto
@@ -128,7 +130,7 @@ Next.js (App Router) + TypeScript estricto, Tailwind v4 y los componentes base d
 Los cinco que tienen que estar en verde antes de dar una tarea por hecha: `npx tsc --noEmit`, `npm run lint`, `npm test`, `npm run e2e` y `npm run build`.
 ```
 
-Los nueve comandos existen en `package.json` y se ejecutan: en esta sesión corrieron `tema`,
+Los ocho comandos `npm` existen en `package.json` y se ejecutan: en esta sesión corrieron `tema`,
 `capturas`, `test`, `lint`, `e2e` y `tsc --noEmit`; `build` lo corre `npm run capturas` en cada
 corrida; `start` lo levanta el script de capturas (en el 3400); y `dev` es el servidor que Germán
 tiene levantado en el 3000.
